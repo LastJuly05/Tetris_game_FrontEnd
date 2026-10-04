@@ -1,0 +1,86 @@
+/*link bản màu */
+/*https://nuhoangthuonghieu.vn/color-palette-35-bang-phoi-mau-dep-goi
+-y-cho-cac-designer-ap-dung-vao-project-thiet-ke-cua-minh/*//*link bản màu */
+/*https://nuhoangthuonghieu.vn/color-palette-35-bang-phoi-mau-dep-goi
+-y-cho-cac-designer-ap-dung-vao-project-thiet-ke-cua-minh/*/
+$navy:  #001C44;
+$ocean: #0C5776;
+$teal:  #2D99AE;
+$ice:   #BCFEFE;
+$peach: #F8DAD0;
+$deep:  #0A3358;
+$soft:  #9FDDE6;
+
+:root {
+    --bg: #{$navy};
+    --panel: #{$ocean};
+    --grid: #{$deep};
+    --text: #{$ice};
+    --muted: #{$soft};
+    --accent: #{$peach};
+    --on-accent: #{$navy};
+                                              }
+
+* { box-sizing: border-box; }
+
+body {
+    margin: 0;
+    min-height: 100vh;
+    background: var(--bg);
+    color: var(--text);
+    font-family: "Segoe UI", system-ui, sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+}
+
+.game {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    flex-wrap: wrap;
+    justify-content: center;
+}
+
+canvas {
+    background: var(--grid);
+    border-radius: 10px;
+    max-width: 100%;
+    height: auto;
+}
+
+.side {
+    background: var(--panel);
+    border-radius: 10px;
+    padding: 16px;
+    width: 170px;
+
+    h1 { font-size: 1.4rem; margin: 0 0 12px; }
+}
+
+.stat {
+    margin-bottom: 10px;
+    color: var(--muted);
+    font-size: .9rem;
+
+    b { display: block; font-size: 1.5rem; color: var(--text); }
+}
+
+#next { display: block; margin: 8px 0 14px; }
+
+button {
+    width: 100%;
+    padding: 10px;
+    border: 0;
+    border-radius: 8px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+
+    &:focus-visible { outline: 3px solid var(--text); outline-offset: 2px; }
+}
+
+.help { margin-top: 12px; font-size: .8rem; color: var(--muted); line-height: 1.6; }
