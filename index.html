@@ -1,13 +1,25 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="vi">
 <head>
     <meta charset="UTF-8">
-    <title>Title</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Tetris</title>
     <link rel="stylesheet" href="style.css">
-
 </head>
 <body>
-
+<div class="game">
+    <canvas id="board" width="300" height="600"></canvas>
+    <div class="side">
+        <h1>Tetris</h1>
+        <div class="stat">Điểm<b id="score">0</b></div>
+        <div class="stat">Hàng đã xóa<b id="lines">0</b></div>
+        <div class="stat">Cấp độ<b id="level">1</b></div>
+        <div class="stat">Khối kế tiếp</div>
+        <canvas id="next" width="120" height="120"></canvas>
+        <button id="start">Bắt đầu</button>
+        <div class="help">← → di chuyển<br>↑ xoay<br>↓ rơi nhanh<br>Space thả xuống<br>P tạm dừng</div>
+    </div>
+</div>
+<script src="script.js"></script>
 </body>
-<script src="style.js"></script>
 </html>
