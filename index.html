@@ -3,23 +3,138 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Tetris</title>
-    <link rel="stylesheet" href="style.scss">
+    <title>Tetris - Game Xếp Gạch Cổ Điển</title>
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="style.css">
 </head>
 <body>
-<div class="game">
-    <canvas id="board" width="300" height="600"></canvas>
-    <div class="side">
-        <h1>Tetris</h1>
-        <div class="stat">Điểm<b id="score">0</b></div>
-        <div class="stat">Hàng đã xóa<b id="lines">0</b></div>
-        <div class="stat">Cấp độ<b id="level">1</b></div>
-        <div class="stat">Khối kế tiếp</div>
-        <canvas id="next" width="120" height="120"></canvas>
-        <button id="start">Bắt đầu</button>
-        <div class="help">← → di chuyển<br>↑ xoay<br>↓ rơi nhanh<br>Space thả xuống<br>P tạm dừng</div>
+
+<div class="game-container">
+    <div class="game-header">
+        <h1>TETRIS</h1>
+        <div class="subtitle">Thử thách vượt qua Level 1 (Mục tiêu 1000 điểm)</div>
+    </div>
+
+    <div class="game">
+        <!-- Khu vực bảng chơi chính -->
+        <div class="board-wrapper">
+            <canvas id="board" width="300" height="600"></canvas>
+            <!-- Thông báo tạm dừng đè lên canvas -->
+            <div id="board-message" class="board-message">
+                <h3>TẠM DỪNG</h3>
+                <p>Nhấn 'P' hoặc 'Tiếp tục' để chơi lại</p>
+            </div>
+        </div>
+
+        <!-- Bảng điều khiển và thông số bên cạnh -->
+        <div class="side">
+            <div class="stats-grid">
+                <div class="stat">
+                    Điểm số
+                    <b id="score">0</b>
+                </div>
+                <div class="stat">
+                    Hàng đã xóa
+                    <b id="lines">0</b>
+                </div>
+                <div class="stat">
+                    Cấp độ
+                    <b id="level">1</b>
+                </div>
+
+                <!-- Thanh tiến trình đạt mốc điểm level -->
+                <div class="progress-container">
+                    <div class="progress-label">
+                        <span>Tiến trình Level 1</span>
+                        <span class="goal"><span id="curr-pts">0</span>/<span id="target-pts">1000</span></span>
+                    </div>
+                    <div class="progress-bar-bg">
+                        <div id="progress-bar-fill" class="progress-bar-fill"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Khối tiếp theo -->
+            <div class="next-box">
+                <div class="next-title">Khối kế tiếp</div>
+                <canvas id="next" width="120" height="120"></canvas>
+            </div>
+
+            <!-- Nút điều khiển -->
+            <div class="controls-row">
+                <button id="start">▶ Bắt đầu</button>
+                <button id="btn-sound" class="btn-icon" title="Bật/Tắt âm thanh" aria-label="Âm thanh">🔊</button>
+            </div>
+
+            <!-- Hướng dẫn phím bấm -->
+            <div class="help">
+                ← → : Di chuyển trái/phải<br>
+                ↑ : Xoay khối gạch<br>
+                ↓ : Rơi nhanh (Soft drop)<br>
+                Space : Thả rơi tức thì<br>
+                P : Tạm dừng / Tiếp tục<br>
+                M : Bật/Tắt âm thanh
+            </div>
+        </div>
     </div>
 </div>
-<script src="script.js"></script>
+
+<!-- Modal Thông Báo Chiến Thắng Level 1 (Đạt 1000 điểm) -->
+<div id="victory-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <div class="modal-badge">🏆 CHIẾN THẮNG!</div>
+        <h2>Chúc mừng bạn đã chiến thắng!</h2>
+        <p class="modal-desc">
+            Bạn đã xuất sắc chinh phục mốc 1000 điểm của Level 1!<br>
+            Bạn có muốn chơi tiếp tục?
+        </p>
+
+        <div class="modal-stats">
+            <div class="modal-stat-item">
+                <span>Điểm đạt được</span>
+                <strong id="modal-score">1000</strong>
+            </div>
+            <div class="modal-stat-item">
+                <span>Số hàng đã xóa</span>
+                <strong id="modal-lines">0</strong>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <!-- 2 option theo đúng yêu cầu người dùng -->
+            <button id="btn-continue" class="btn-secondary">Tiếp tục</button>
+            <button id="btn-next-level" class="btn-primary">Chơi level tiếp theo</button>
+        </div>
+    </div>
+</div>
+
+<!-- Modal Game Over -->
+<div id="gameover-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <div class="modal-badge alert">💀 GAME OVER</div>
+        <h2>Trò chơi kết thúc</h2>
+        <p class="modal-desc">Khối gạch đã chạm đỉnh!</p>
+
+        <div class="modal-stats">
+            <div class="modal-stat-item">
+                <span>Điểm cuối cùng</span>
+                <strong id="go-score">0</strong>
+            </div>
+            <div class="modal-stat-item">
+                <span>Hàng đã xóa</span>
+                <strong id="go-lines">0</strong>
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button id="btn-restart" class="btn-primary">Chơi lại</button>
+        </div>
+    </div>
+</div>
+
+<script src="style.js"></script>
 </body>
 </html>

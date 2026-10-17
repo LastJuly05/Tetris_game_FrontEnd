@@ -1,0 +1,431 @@
+/* --- Biến màu sắc --- */
+:root {
+    --navy:  #001C44;
+    --ocean: #0C5776;
+    --teal:  #2D99AE;
+    --ice:   #BCFEFE;
+    --peach: #F8DAD0;
+    --deep:  #0A3358;
+    --soft:  #9FDDE6;
+}
+
+/* --- Reset cơ bản --- */
+*, *::before, *::after {
+    box-sizing: border-box;
+    margin: 0;
+    padding: 0;
+}
+
+/* --- Body --- */
+body {
+    min-height: 100vh;
+    background-color: var(--navy);
+    background-image: radial-gradient(ellipse at 50% 20%, #0d3861 0%, var(--navy) 65%);
+    color: var(--ice);
+    font-family: 'Outfit', 'Segoe UI', sans-serif;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    user-select: none;
+}
+   /*LAYOUT CHÍNH*/
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 20px;
+}
+
+/* Tiêu đề game */
+.game-header {
+    text-align: center;
+}
+
+.game-header h1 {
+    font-size: 2.4rem;
+    font-weight: 800;
+    letter-spacing: 6px;
+    color: var(--ice);
+    text-shadow: 0 0 20px rgba(188, 254, 254, 0.4);
+}
+
+.game-header .subtitle {
+    margin-top: 6px;
+    font-size: 0.85rem;
+    color: var(--soft);
+    letter-spacing: 0.5px;
+}
+
+/* Khu vực chứa bảng chơi + panel bên */
+.game {
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+}
+
+
+   /*BẢNG CHƠI (CANVAS)*/
+
+
+.board-wrapper {
+    position: relative;
+    border-radius: 10px;
+    border: 2px solid var(--ocean);
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+}
+
+#board {
+    display: block;
+    background: var(--deep);
+    border-radius: 8px;
+}
+
+/* Overlay tạm dừng đè lên canvas */
+.board-message {
+    position: absolute;
+    inset: 0;
+    background: rgba(0, 28, 68, 0.88);
+    border-radius: 8px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s;
+}
+
+.board-message.visible {
+    opacity: 1;
+    pointer-events: auto;
+}
+
+.board-message h3 {
+    font-size: 1.8rem;
+    letter-spacing: 3px;
+    color: var(--ice);
+}
+
+.board-message p {
+    font-size: 0.85rem;
+    color: var(--soft);
+}
+
+
+   /*PANEL BÊN PHẢI*/
+
+.side {
+    width: 190px;
+    display: flex;
+    flex-direction: column;
+    gap: 14px;
+    background: rgba(12, 87, 118, 0.5);
+    border: 1px solid rgba(188, 254, 254, 0.12);
+    border-radius: 10px;
+    padding: 16px;
+}
+
+/* --- Stats (điểm, hàng, cấp độ) --- */
+.stats-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.stat {
+    background: rgba(10, 51, 88, 0.7);
+    border: 1px solid rgba(159, 221, 230, 0.1);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 0.78rem;
+    color: var(--soft);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.stat b {
+    display: block;
+    margin-top: 2px;
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--ice);
+}
+
+/* --- Thanh tiến trình Level --- */
+.progress-container {
+    background: rgba(10, 51, 88, 0.7);
+    border: 1px solid rgba(159, 221, 230, 0.1);
+    border-radius: 8px;
+    padding: 8px 12px;
+}
+
+.progress-label {
+    display: flex;
+    justify-content: space-between;
+    font-size: 0.75rem;
+    color: var(--soft);
+    margin-bottom: 6px;
+}
+
+.progress-label .goal {
+    color: var(--peach);
+    font-weight: 600;
+}
+
+.progress-bar-bg {
+    height: 8px;
+    background: rgba(0, 28, 68, 0.8);
+    border-radius: 4px;
+    overflow: hidden;
+}
+
+.progress-bar-fill {
+    height: 100%;
+    width: 0%;
+    background: linear-gradient(90deg, var(--teal), var(--ice));
+    border-radius: 4px;
+    transition: width 0.3s ease;
+}
+
+/* --- Preview khối tiếp theo --- */
+.next-box {
+    background: rgba(10, 51, 88, 0.7);
+    border: 1px solid rgba(159, 221, 230, 0.1);
+    border-radius: 8px;
+    padding: 10px 12px;
+    text-align: center;
+}
+
+.next-title {
+    font-size: 0.78rem;
+    color: var(--soft);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    margin-bottom: 8px;
+}
+
+#next {
+    display: block;
+    margin: 0 auto;
+    background: rgba(0, 28, 68, 0.5);
+    border-radius: 6px;
+}
+
+/* --- Nút bấm --- */
+.controls-row {
+    display: flex;
+    gap: 8px;
+}
+
+button {
+    padding: 10px 14px;
+    border: none;
+    border-radius: 8px;
+    font-family: inherit;
+    font-size: 0.9rem;
+    font-weight: 700;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+}
+
+button:hover {
+    transform: translateY(-2px);
+}
+
+button:active {
+    transform: translateY(0);
+}
+
+/* Nút chính (Bắt đầu) */
+#start {
+    flex: 1;
+    background: var(--peach);
+    color: var(--navy);
+    box-shadow: 0 4px 12px rgba(248, 218, 208, 0.25);
+}
+
+#start:hover {
+    box-shadow: 0 6px 18px rgba(248, 218, 208, 0.4);
+}
+
+/* Nút icon (Âm thanh) */
+#btn-sound {
+    background: rgba(10, 51, 88, 0.8);
+    color: var(--ice);
+    border: 1px solid rgba(188, 254, 254, 0.2);
+    font-size: 1.1rem;
+    width: 42px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+#btn-sound:hover {
+    background: rgba(45, 153, 174, 0.35);
+}
+
+/* --- Hướng dẫn phím --- */
+.help {
+    font-size: 0.78rem;
+    color: var(--soft);
+    line-height: 1.7;
+    border-left: 3px solid var(--teal);
+    padding-left: 10px;
+}
+
+
+   /*MODAL (dùng chung cho Victory & Game Over)*/
+
+.modal-overlay {
+    position: fixed;
+    inset: 0;
+    background: rgba(0, 10, 28, 0.75);
+    backdrop-filter: blur(6px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 16px;
+    z-index: 100;
+    transition: opacity 0.25s, visibility 0.25s;
+}
+
+.modal-overlay.hidden {
+    opacity: 0;
+    visibility: hidden;
+    pointer-events: none;
+}
+
+.modal-box {
+    background: #072848;
+    border: 2px solid var(--teal);
+    border-radius: 14px;
+    padding: 28px 24px;
+    text-align: center;
+    width: 100%;
+    max-width: 380px;
+    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+    animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+@keyframes popIn {
+    from { transform: scale(0.85); opacity: 0; }
+    to   { transform: scale(1);    opacity: 1; }
+}
+
+/* Badge nhỏ trên đầu modal */
+.modal-badge {
+    display: inline-block;
+    padding: 5px 14px;
+    border-radius: 20px;
+    font-size: 0.78rem;
+    font-weight: 800;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    background: linear-gradient(135deg, #ffd700, #ffa500);
+    color: var(--navy);
+}
+
+.modal-badge.alert {
+    background: linear-gradient(135deg, #ff5252, #c62828);
+    color: #fff;
+}
+
+.modal-box h2 {
+    font-size: 1.4rem;
+    color: #fff;
+    margin-bottom: 8px;
+}
+
+.modal-desc {
+    font-size: 0.9rem;
+    color: var(--soft);
+    line-height: 1.6;
+    margin-bottom: 16px;
+}
+
+/* Ô thống kê trong modal */
+.modal-stats {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 10px;
+    background: rgba(0, 28, 68, 0.5);
+    border: 1px solid rgba(159, 221, 230, 0.12);
+    border-radius: 10px;
+    padding: 12px;
+    margin-bottom: 20px;
+}
+
+.modal-stat-item span {
+    display: block;
+    font-size: 0.75rem;
+    color: var(--soft);
+    text-transform: uppercase;
+}
+
+.modal-stat-item strong {
+    display: block;
+    font-size: 1.4rem;
+    color: var(--ice);
+    margin-top: 2px;
+}
+
+/* Các nút trong modal */
+.modal-actions {
+    display: flex;
+    gap: 12px;
+}
+
+.modal-actions button {
+    flex: 1;
+    padding: 12px;
+    font-size: 0.9rem;
+}
+
+.btn-primary {
+    background: var(--teal);
+    color: var(--navy);
+    box-shadow: 0 4px 14px rgba(45, 153, 174, 0.4);
+}
+
+.btn-primary:hover {
+    box-shadow: 0 6px 20px rgba(45, 153, 174, 0.6);
+}
+
+.btn-secondary {
+    background: transparent;
+    color: var(--ice);
+    border: 1.5px solid var(--soft);
+}
+
+.btn-secondary:hover {
+    background: rgba(159, 221, 230, 0.1);
+}
+
+
+   /*CONFETTI (hiệu ứng chiến thắng)*/
+
+
+.confetti-piece {
+    position: fixed;
+    top: -20px;
+    width: 8px;
+    height: 14px;
+    border-radius: 2px;
+    pointer-events: none;
+    z-index: 200;
+    animation: fall 2.5s ease-in forwards;
+}
+
+@keyframes fall {
+    from {
+        transform: translateY(0) rotate(0deg);
+        opacity: 1;
+    }
+    to {
+        transform: translateY(105vh) rotate(540deg);
+        opacity: 0;
+    }
+}
