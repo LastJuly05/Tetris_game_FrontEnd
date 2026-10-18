@@ -1,35 +1,41 @@
-/* --- Biến màu sắc --- */
+/* ================================================
+   TETRIS - style.css
+   Theme: Sáng, sạch — viền board gradient 2 màu
+   ================================================ */
+
 :root {
-    --navy:  #001C44;
-    --ocean: #0C5776;
-    --teal:  #2D99AE;
-    --ice:   #BCFEFE;
-    --peach: #F8DAD0;
-    --deep:  #0A3358;
-    --soft:  #9FDDE6;
+    --bg:        #eef2ff;
+    --surface:   #ffffff;
+    --border:    #d4d9f0;
+    --text:      #1e2a4a;
+    --text-muted: #6b7a9e;
+    --accent1:   #7c3aed;   /* tím — màu góc 1 */
+    --accent2:   #06b6d4;   /* cyan — màu góc 2 */
+    --gold:      #f59e0b;
+    --red:       #ef4444;
 }
 
-/* --- Reset cơ bản --- */
 *, *::before, *::after {
     box-sizing: border-box;
     margin: 0;
     padding: 0;
 }
 
-/* --- Body --- */
 body {
     min-height: 100vh;
-    background-color: var(--navy);
-    background-image: radial-gradient(ellipse at 50% 20%, #0d3861 0%, var(--navy) 65%);
-    color: var(--ice);
-    font-family: 'Outfit', 'Segoe UI', sans-serif;
+    background: #eef2ff;
+    color: var(--text);
+    font-family: var(--bs-font-sans-serif); /* font stack của Bootstrap */
     display: flex;
     align-items: center;
     justify-content: center;
-    padding: 20px;
+    padding: 24px;
     user-select: none;
 }
-   /*LAYOUT CHÍNH*/
+
+/* ================================================
+   LAYOUT
+   ================================================ */
 
 .game-container {
     display: flex;
@@ -38,56 +44,59 @@ body {
     gap: 20px;
 }
 
-/* Tiêu đề game */
-.game-header {
-    text-align: center;
-}
-
 .game-header h1 {
-    font-size: 2.4rem;
+    font-size: 2.6rem;
     font-weight: 800;
-    letter-spacing: 6px;
-    color: var(--ice);
-    text-shadow: 0 0 20px rgba(188, 254, 254, 0.4);
+    letter-spacing: 8px;
+    text-transform: uppercase;
+    /* Chữ TETRIS màu gradient 2 màu */
+    background: linear-gradient(120deg, var(--accent1), var(--accent2));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
 }
 
-.game-header .subtitle {
-    margin-top: 6px;
-    font-size: 0.85rem;
-    color: var(--soft);
-    letter-spacing: 0.5px;
-}
-
-/* Khu vực chứa bảng chơi + panel bên */
 .game {
     display: flex;
     gap: 20px;
     align-items: flex-start;
 }
 
-
-   /*BẢNG CHƠI (CANVAS)*/
-
+/* ================================================
+   KHUNG BỘ CHƠI — Viền gradient rainbow 2 màu
+   Cách: wrapper có background gradient, canvas đè lên
+   => tạo ra viền gradient tím → cyan
+   ================================================ */
 
 .board-wrapper {
+    padding: 4px;
+    border-radius: 14px;
+    /* Gradient chạy từ góc trên-trái (tím) → góc dưới-phải (cyan) */
+    background: linear-gradient(
+            135deg,
+            #7c3aed 0%,
+            #a855f7 30%,
+            #22d3ee 70%,
+            #06b6d4 100%
+    );
+    box-shadow:
+            0 4px 20px rgba(124, 58, 237, 0.25),
+            0 4px 20px rgba(6, 182, 212, 0.2);
     position: relative;
-    border-radius: 10px;
-    border: 2px solid var(--ocean);
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
 }
 
 #board {
     display: block;
-    background: var(--deep);
-    border-radius: 8px;
+    background: #f8f9ff;
+    border-radius: 10px;
 }
 
-/* Overlay tạm dừng đè lên canvas */
+/* Overlay tạm dừng */
 .board-message {
     position: absolute;
-    inset: 0;
-    background: rgba(0, 28, 68, 0.88);
-    border-radius: 8px;
+    inset: 4px;
+    background: rgba(238, 242, 255, 0.9);
+    border-radius: 10px;
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -105,30 +114,32 @@ body {
 
 .board-message h3 {
     font-size: 1.8rem;
+    font-weight: 800;
     letter-spacing: 3px;
-    color: var(--ice);
+    color: var(--accent1);
 }
 
 .board-message p {
     font-size: 0.85rem;
-    color: var(--soft);
+    color: var(--text-muted);
 }
 
-
-   /*PANEL BÊN PHẢI*/
+/* ================================================
+   PANEL BÊN PHẢI
+   ================================================ */
 
 .side {
     width: 190px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
-    background: rgba(12, 87, 118, 0.5);
-    border: 1px solid rgba(188, 254, 254, 0.12);
-    border-radius: 10px;
+    gap: 10px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 14px;
     padding: 16px;
+    box-shadow: 0 2px 12px rgba(30, 42, 74, 0.08);
 }
 
-/* --- Stats (điểm, hàng, cấp độ) --- */
 .stats-grid {
     display: flex;
     flex-direction: column;
@@ -136,12 +147,13 @@ body {
 }
 
 .stat {
-    background: rgba(10, 51, 88, 0.7);
-    border: 1px solid rgba(159, 221, 230, 0.1);
+    background: #f5f7ff;
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 8px 12px;
-    font-size: 0.78rem;
-    color: var(--soft);
+    font-size: 0.75rem;
+    font-weight: 600;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
 }
@@ -149,15 +161,15 @@ body {
 .stat b {
     display: block;
     margin-top: 2px;
-    font-size: 1.5rem;
+    font-size: 1.6rem;
     font-weight: 700;
-    color: var(--ice);
+    color: var(--text);
 }
 
-/* --- Thanh tiến trình Level --- */
+/* Thanh tiến trình */
 .progress-container {
-    background: rgba(10, 51, 88, 0.7);
-    border: 1px solid rgba(159, 221, 230, 0.1);
+    background: #f5f7ff;
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 8px 12px;
 }
@@ -165,19 +177,19 @@ body {
 .progress-label {
     display: flex;
     justify-content: space-between;
-    font-size: 0.75rem;
-    color: var(--soft);
+    font-size: 0.73rem;
+    color: var(--text-muted);
     margin-bottom: 6px;
 }
 
 .progress-label .goal {
-    color: var(--peach);
-    font-weight: 600;
+    font-weight: 700;
+    color: var(--accent1);
 }
 
 .progress-bar-bg {
-    height: 8px;
-    background: rgba(0, 28, 68, 0.8);
+    height: 7px;
+    background: #e2e8f0;
     border-radius: 4px;
     overflow: hidden;
 }
@@ -185,23 +197,24 @@ body {
 .progress-bar-fill {
     height: 100%;
     width: 0%;
-    background: linear-gradient(90deg, var(--teal), var(--ice));
+    background: linear-gradient(90deg, var(--accent1), var(--accent2));
     border-radius: 4px;
     transition: width 0.3s ease;
 }
 
-/* --- Preview khối tiếp theo --- */
+/* Preview khối tiếp theo */
 .next-box {
-    background: rgba(10, 51, 88, 0.7);
-    border: 1px solid rgba(159, 221, 230, 0.1);
+    background: #f5f7ff;
+    border: 1px solid var(--border);
     border-radius: 8px;
     padding: 10px 12px;
     text-align: center;
 }
 
 .next-title {
-    font-size: 0.78rem;
-    color: var(--soft);
+    font-size: 0.73rem;
+    font-weight: 600;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.5px;
     margin-bottom: 8px;
@@ -210,11 +223,14 @@ body {
 #next {
     display: block;
     margin: 0 auto;
-    background: rgba(0, 28, 68, 0.5);
+    background: #eef2ff;
     border-radius: 6px;
 }
 
-/* --- Nút bấm --- */
+/* ================================================
+   NÚT BẤM
+   ================================================ */
+
 .controls-row {
     display: flex;
     gap: 8px;
@@ -231,31 +247,24 @@ button {
     transition: transform 0.15s, box-shadow 0.15s;
 }
 
-button:hover {
-    transform: translateY(-2px);
-}
+button:hover  { transform: translateY(-2px); }
+button:active { transform: translateY(0); }
 
-button:active {
-    transform: translateY(0);
-}
-
-/* Nút chính (Bắt đầu) */
 #start {
     flex: 1;
-    background: var(--peach);
-    color: var(--navy);
-    box-shadow: 0 4px 12px rgba(248, 218, 208, 0.25);
+    background: linear-gradient(120deg, var(--accent1), var(--accent2));
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
 }
 
 #start:hover {
-    box-shadow: 0 6px 18px rgba(248, 218, 208, 0.4);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
 }
 
-/* Nút icon (Âm thanh) */
 #btn-sound {
-    background: rgba(10, 51, 88, 0.8);
-    color: var(--ice);
-    border: 1px solid rgba(188, 254, 254, 0.2);
+    background: #f5f7ff;
+    color: var(--text);
+    border: 1px solid var(--border);
     font-size: 1.1rem;
     width: 42px;
     padding: 0;
@@ -263,26 +272,27 @@ button:active {
 }
 
 #btn-sound:hover {
-    background: rgba(45, 153, 174, 0.35);
+    background: #eef2ff;
 }
 
-/* --- Hướng dẫn phím --- */
+/* Hướng dẫn phím */
 .help {
-    font-size: 0.78rem;
-    color: var(--soft);
+    font-size: 0.76rem;
+    color: var(--text-muted);
     line-height: 1.7;
-    border-left: 3px solid var(--teal);
+    border-left: 3px solid var(--accent2);
     padding-left: 10px;
 }
 
-
-   /*MODAL (dùng chung cho Victory & Game Over)*/
+/* ================================================
+   MODAL
+   ================================================ */
 
 .modal-overlay {
     position: fixed;
     inset: 0;
-    background: rgba(0, 10, 28, 0.75);
-    backdrop-filter: blur(6px);
+    background: rgba(30, 42, 74, 0.35);
+    backdrop-filter: blur(4px);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -298,23 +308,22 @@ button:active {
 }
 
 .modal-box {
-    background: #072848;
-    border: 2px solid var(--teal);
-    border-radius: 14px;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 16px;
     padding: 28px 24px;
     text-align: center;
     width: 100%;
     max-width: 380px;
-    box-shadow: 0 12px 40px rgba(0, 0, 0, 0.7);
+    box-shadow: 0 12px 40px rgba(30, 42, 74, 0.18);
     animation: popIn 0.3s cubic-bezier(0.34, 1.56, 0.64, 1);
 }
 
 @keyframes popIn {
-    from { transform: scale(0.85); opacity: 0; }
+    from { transform: scale(0.88); opacity: 0; }
     to   { transform: scale(1);    opacity: 1; }
 }
 
-/* Badge nhỏ trên đầu modal */
 .modal-badge {
     display: inline-block;
     padding: 5px 14px;
@@ -324,35 +333,34 @@ button:active {
     letter-spacing: 1px;
     text-transform: uppercase;
     margin-bottom: 12px;
-    background: linear-gradient(135deg, #ffd700, #ffa500);
-    color: var(--navy);
+    background: linear-gradient(120deg, var(--gold), #f97316);
+    color: #fff;
 }
 
 .modal-badge.alert {
-    background: linear-gradient(135deg, #ff5252, #c62828);
-    color: #fff;
+    background: linear-gradient(120deg, var(--red), #dc2626);
 }
 
 .modal-box h2 {
-    font-size: 1.4rem;
-    color: #fff;
+    font-size: 1.35rem;
+    font-weight: 700;
+    color: var(--text);
     margin-bottom: 8px;
 }
 
 .modal-desc {
     font-size: 0.9rem;
-    color: var(--soft);
+    color: var(--text-muted);
     line-height: 1.6;
     margin-bottom: 16px;
 }
 
-/* Ô thống kê trong modal */
 .modal-stats {
     display: grid;
     grid-template-columns: 1fr 1fr;
     gap: 10px;
-    background: rgba(0, 28, 68, 0.5);
-    border: 1px solid rgba(159, 221, 230, 0.12);
+    background: #f5f7ff;
+    border: 1px solid var(--border);
     border-radius: 10px;
     padding: 12px;
     margin-bottom: 20px;
@@ -360,22 +368,23 @@ button:active {
 
 .modal-stat-item span {
     display: block;
-    font-size: 0.75rem;
-    color: var(--soft);
+    font-size: 0.73rem;
+    font-weight: 600;
+    color: var(--text-muted);
     text-transform: uppercase;
 }
 
 .modal-stat-item strong {
     display: block;
-    font-size: 1.4rem;
-    color: var(--ice);
+    font-size: 1.5rem;
+    font-weight: 700;
+    color: var(--text);
     margin-top: 2px;
 }
 
-/* Các nút trong modal */
 .modal-actions {
     display: flex;
-    gap: 12px;
+    gap: 10px;
 }
 
 .modal-actions button {
@@ -385,28 +394,29 @@ button:active {
 }
 
 .btn-primary {
-    background: var(--teal);
-    color: var(--navy);
-    box-shadow: 0 4px 14px rgba(45, 153, 174, 0.4);
+    background: linear-gradient(120deg, var(--accent1), var(--accent2));
+    color: #fff;
+    box-shadow: 0 4px 14px rgba(124, 58, 237, 0.3);
 }
 
 .btn-primary:hover {
-    box-shadow: 0 6px 20px rgba(45, 153, 174, 0.6);
+    box-shadow: 0 6px 20px rgba(124, 58, 237, 0.45);
 }
 
 .btn-secondary {
-    background: transparent;
-    color: var(--ice);
-    border: 1.5px solid var(--soft);
+    background: #f5f7ff;
+    color: var(--text);
+    border: 1.5px solid var(--border);
 }
 
 .btn-secondary:hover {
-    background: rgba(159, 221, 230, 0.1);
+    background: #eef2ff;
+    border-color: var(--accent1);
 }
 
-
-   /*CONFETTI (hiệu ứng chiến thắng)*/
-
+/* ================================================
+   CONFETTI
+   ================================================ */
 
 .confetti-piece {
     position: fixed;
@@ -420,12 +430,6 @@ button:active {
 }
 
 @keyframes fall {
-    from {
-        transform: translateY(0) rotate(0deg);
-        opacity: 1;
-    }
-    to {
-        transform: translateY(105vh) rotate(540deg);
-        opacity: 0;
-    }
+    from { transform: translateY(0) rotate(0deg);    opacity: 1; }
+    to   { transform: translateY(105vh) rotate(540deg); opacity: 0; }
 }
