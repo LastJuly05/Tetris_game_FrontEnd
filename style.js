@@ -1,51 +1,115 @@
 /**
  * Tetris - Game Xếp Gạch
- * Hệ thống Level 1 & Tiến trình cấp độ
- * Sử dụng HTML5 Canvas & Web Audio API
+ *   - Màn 1: Cổ Điển (Đạt 1000 điểm)
+ *   - Màn 2: Đảo Phím Bấm (Trái ⇄ Phải, Đạt 2000 điểm - Tích hợp khung riêng)
+ *   - Màn 3: Thu Thập 10 Loại Icon (Trái tim, Vương miện, Ngôi sao, Tia chớp, Kim cương, Lửa, Bông tuyết, Lá cây, Giọt nước, Dâu tây)
+ *   - Giao diện 3 cột gọn gàng, vừa khít 1 khung màn hình KHÔNG SCROLL
+ *   - ĐÃ ẨN HOÀN TOÀN ĐƯỜNG ĐI CUỐI CÙNG (GHOST PIECE)
  */
 
 (function () {
+    'use strict';
 
     // ============================================================
-    // Lấy phần tử Canvas & DOM
+    // Danh sách 10 loại Icon chuẩn theo ảnh mẫu
     // ============================================================
 
-    const canvasBang    = document.getElementById('board');
-    const ngCanhBang    = canvasBang.getContext('2d');
-    const canvasKhoi    = document.getElementById('next');
-    const ngCanhKhoi    = canvasKhoi.getContext('2d');
+    const DANH_SACH_10_ICON = [
+        { id: 'heart',      ten: 'Trái tim',    icon: '❤️', mau: '#ff2d78', bg: '#4a0e2e' },
+        { id: 'crown',      ten: 'Vương miện',  icon: '👑', mau: '#fbbf24', bg: '#451a03' },
+        { id: 'star',       ten: 'Ngôi sao',    icon: '⭐', mau: '#facc15', bg: '#422006' },
+        { id: 'lightning',  ten: 'Tia chớp',    icon: '⚡', mau: '#22d3ee', bg: '#083344' },
+        { id: 'diamond',    ten: 'Kim cương',   icon: '💎', mau: '#c084fc', bg: '#3b0764' },
+        { id: 'fire',       ten: 'Lửa',         icon: '🔥', mau: '#fb923c', bg: '#431407' },
+        { id: 'snowflake',  ten: 'Bông tuyết',  icon: '❄️', mau: '#7dd3fc', bg: '#0c4a6e' },
+        { id: 'leaf',       ten: 'Lá cây',      icon: '🍃', mau: '#4ade80', bg: '#052e16' },
+        { id: 'water',      ten: 'Giọt nước',   icon: '💧', mau: '#60a5fa', bg: '#172554' },
+        { id: 'strawberry', ten: 'Dâu tây',     icon: '🍓', mau: '#fb7185', bg: '#4c0519' }
+    ];
+
+    const TEN_KHOI = [
+        '',
+        'Khối chữ I',
+        'Khối chữ J',
+        'Khối chữ L',
+        'Khối chữ O',
+        'Khối chữ S',
+        'Khối chữ T',
+        'Khối chữ Z'
+    ];
+
+    // ============================================================
+    // DOM Elements
+    // ============================================================
+
+    const canvasBang        = document.getElementById('board');
+    const ngCanhBang        = canvasBang.getContext('2d');
+    const canvasKhoi        = document.getElementById('next');
+    const ngCanhKhoi        = canvasKhoi.getContext('2d');
 
     const phanTuDiem        = document.getElementById('score');
     const phanTuHang        = document.getElementById('lines');
     const phanTuCap         = document.getElementById('level');
+    const phanTuThoiGian    = document.getElementById('game-time');
     const nutBatDau         = document.getElementById('start');
     const nutAmThanh        = document.getElementById('btn-sound');
     const thongBaoBang      = document.getElementById('board-message');
-    const phanTuDiemHienTai = document.getElementById('curr-pts');
-    const phanTuMucTieu     = document.getElementById('target-pts');
-    const thanhTienTrinh    = document.getElementById('progress-bar-fill');
+    const moTaKhoiTiep      = document.getElementById('next-desc');
+    const toastQua          = document.getElementById('fruit-toast');
 
+    // Cột trái: 2 chế độ hiển thị
+    const sectionIconList   = document.getElementById('icon-list-section');
+    const iconProgressBadge = document.getElementById('icon-progress-badge');
+    const sectionMission    = document.getElementById('mission-section');
+    const missionTitle      = document.getElementById('mission-title');
+    const missionDesc       = document.getElementById('mission-desc');
+    const missionGoalLabel  = document.getElementById('mission-goal-label');
+    const missionGoalVal    = document.getElementById('mission-goal-val');
+    const leftProgressFill  = document.getElementById('left-progress-fill');
+    const boxDaoPhim        = document.getElementById('alert-inverted-box');
+
+    // Menu & Điều hướng màn hình
+    const menuChinh         = document.getElementById('main-menu');
+    const khungGame         = document.getElementById('game-container');
+    const nutVeMenu         = document.getElementById('btn-back-menu');
+    const textLevelHienTai  = document.getElementById('current-level-text');
+
+    const cardLvl1          = document.getElementById('card-lvl-1');
+    const cardLvl2          = document.getElementById('card-lvl-2');
+    const cardLvl3          = document.getElementById('card-lvl-3');
+
+    // Modals
     const modalChienThang   = document.getElementById('victory-modal');
+    const modalTieuDe       = document.getElementById('modal-title');
+    const modalMoTa         = document.getElementById('modal-desc');
     const modalDiemCT       = document.getElementById('modal-score');
     const modalHangCT       = document.getElementById('modal-lines');
     const nutTiepTuc        = document.getElementById('btn-continue');
     const nutLevelTiep      = document.getElementById('btn-next-level');
+    const nutModalMenu      = document.getElementById('btn-modal-menu');
+
+    const modalQuestWin     = document.getElementById('quest-victory-modal');
+    const questWinDiem      = document.getElementById('quest-win-score');
+    const questWinHang      = document.getElementById('quest-win-lines');
+    const questWinThoiGian  = document.getElementById('quest-win-time');
+    const nutQuestChoiLai   = document.getElementById('btn-quest-replay');
+    const nutQuestMenu      = document.getElementById('btn-quest-menu');
 
     const modalGameOver     = document.getElementById('gameover-modal');
     const goDiem            = document.getElementById('go-score');
     const goHang            = document.getElementById('go-lines');
     const nutChoiLai        = document.getElementById('btn-restart');
+    const nutGameOverMenu   = document.getElementById('btn-gameover-menu');
 
     // ============================================================
-    // Hằng số cố định
+    // Cấu hình Bảng & Khối
     // ============================================================
 
     const SO_COT          = 10;
     const SO_HANG         = 20;
-    const KICH_THUOC_O    = 30;    // 300px / 10 cột = 30px mỗi ô
-    const KICH_THUOC_XEM  = 24;    // kích thước ô trong khung xem trước
+    const KICH_THUOC_O    = 30;
+    const KICH_THUOC_XEM  = 24;
 
-    // Bảng màu 7 loại khối (chỉ số 1–7, chỉ số 0 = trống)
     const BANG_MAU = [
         null,
         { chinh: '#00F0FF', sang: '#BCFEFE', toi: '#0099AA' }, // I - Cyan
@@ -57,47 +121,24 @@
         { chinh: '#FF5252', sang: '#FFCDD2', toi: '#B71C1C' }, // Z - Đỏ
     ];
 
-    // Hình dạng 7 loại khối Tetromino (ma trận 2D)
     const HINH_KHOI = [
         null,
-        // I
-        [[0,0,0,0],
-            [1,1,1,1],
-            [0,0,0,0],
-            [0,0,0,0]],
-        // J
-        [[2,0,0],
-            [2,2,2],
-            [0,0,0]],
-        // L
-        [[0,0,3],
-            [3,3,3],
-            [0,0,0]],
-        // O
-        [[4,4],
-            [4,4]],
-        // S
-        [[0,5,5],
-            [5,5,0],
-            [0,0,0]],
-        // T
-        [[0,6,0],
-            [6,6,6],
-            [0,0,0]],
-        // Z
-        [[7,7,0],
-            [0,7,7],
-            [0,0,0]],
+        [[0,0,0,0], [1,1,1,1], [0,0,0,0], [0,0,0,0]], // I
+        [[2,0,0],   [2,2,2],   [0,0,0]],               // J
+        [[0,0,3],   [3,3,3],   [0,0,0]],               // L
+        [[4,4],     [4,4]],                            // O
+        [[0,5,5],   [5,5,0],   [0,0,0]],               // S
+        [[0,6,0],   [6,6,6],   [0,0,0]],               // T
+        [[7,7,0],   [0,7,7],   [0,0,0]],               // Z
     ];
 
     // ============================================================
-    // Âm thanh — Tổng hợp bằng Web Audio API
+    // Âm thanh Web Audio API
     // ============================================================
 
-    let boAm        = null;   // AudioContext
-    let batAmThanh  = true;   // trạng thái bật/tắt âm thanh
+    let boAm        = null;
+    let batAmThanh  = true;
 
-    /** Khởi tạo AudioContext (cần tương tác người dùng trước) */
     function khoiTaoAm() {
         if (!boAm) {
             const AC = window.AudioContext || window.webkitAudioContext;
@@ -106,11 +147,10 @@
         if (boAm && boAm.state === 'suspended') boAm.resume();
     }
 
-    /** Phát một âm đơn giản theo tần số & thời lượng */
     function phatAm(tanSo, thoiLuong, loai = 'sine', amLuong = 0.15) {
         if (!batAmThanh || !boAm) return;
         try {
-            const dao  = boAm.createOscillator();
+            const dao    = boAm.createOscillator();
             const khuech = boAm.createGain();
             dao.type = loai;
             dao.frequency.setValueAtTime(tanSo, boAm.currentTime);
@@ -123,13 +163,9 @@
         } catch (e) {}
     }
 
-    /** Âm khi di chuyển khối */
-    function amDiChuyen()  { phatAm(180, 0.04, 'triangle', 0.08); }
-
-    /** Âm khi khối rơi xuống / khóa */
+    function amDiChuyen()  { phatAm(200, 0.04, 'triangle', 0.08); }
     function amRoi()       { phatAm(90,  0.09, 'sine',     0.20); }
 
-    /** Âm khi xoay khối (tần số tăng dần) */
     function amXoay() {
         if (!batAmThanh || !boAm) return;
         try {
@@ -147,63 +183,201 @@
         } catch (e) {}
     }
 
-    /** Âm khi xóa hàng (số hàng xóa càng nhiều → âm càng cao) */
     function amXoaHang(soHang) {
         if (!batAmThanh || !boAm) return;
         const notam = soHang >= 4 ? [440, 554, 659, 880] : [523, 659, 784];
         notam.forEach((f, i) => setTimeout(() => phatAm(f, 0.18, 'triangle', 0.2), i * 70));
     }
 
-    /** Âm chiến thắng — giai điệu ngắn vui */
-    function amChienThang() {
+    function amSao() {
         if (!batAmThanh || !boAm) return;
-        [{ f: 523.25 }, { f: 659.25 }, { f: 783.99 }, { f: 1046.50 }]
-            .forEach((n, i) => setTimeout(() => phatAm(n.f, 0.18, 'triangle', 0.25), i * 130));
+        const chime = [523.25, 659.25, 783.99, 1046.50, 1318.51];
+        chime.forEach((f, i) => setTimeout(() => phatAm(f, 0.2, 'triangle', 0.22), i * 70));
     }
 
-    /** Âm game over — giai điệu giảm dần */
+    function amChienThang() {
+        if (!batAmThanh || !boAm) return;
+        [{ f: 523.25 }, { f: 659.25 }, { f: 783.99 }, { f: 1046.50 }, { f: 1318.51 }]
+            .forEach((n, i) => setTimeout(() => phatAm(n.f, 0.24, 'triangle', 0.25), i * 110));
+    }
+
     function amGameOver() {
         if (!batAmThanh || !boAm) return;
         [440, 392, 349, 293].forEach((f, i) =>
-            setTimeout(() => phatAm(f, 0.25, 'sawtooth', 0.15), i * 150)
+            setTimeout(() => phatAm(f, 0.25, 'sawtooth', 0.15), i * 140)
         );
     }
 
     // ============================================================
-    // Biến trạng thái game
+    // Biến trạng thái trò chơi
     // ============================================================
 
-    let luoi, diem, soHang, capDo, mucTieuDiem;
-    let level1HoanThanh;
-    let khoiHienTai, khoiTiepTheo, tuiKhoi;
-    let dangChoi, dangDung, ketThuc;
+    let luoi;
+    let luoiIcon;
+    let diem;
+    let soHang;
+    let capDo = 1;
+    let mucTieuDiem;
+
+    // Bộ đếm 10 icon trong Màn 3: { heart: 2, star: 1, ... }
+    let boDemIcon = {};
+    let boSuuTapDaCo = new Set();
+
+    let khoiHienTai;
+    let khoiTiepTheo;
+    let tuiKhoi;
+    let dangChoi = false;
+    let dangDung = false;
+    let ketThuc  = false;
     let doDem, thoiGianTruoc, idFrame, tocDoRoi;
 
-    /** Tính tốc độ rơi theo cấp độ (ms/bước rơi) */
+    let giayDaChoi = 0;
+    let idIntervalTimer = null;
+    let timerTimeoutToast = null;
+
     function layTocDoRoi(cap) {
-        if (cap === 1) return 850;
-        if (cap === 2) return 500;
-        if (cap === 3) return 350;
-        return Math.max(150, 250 - (cap - 4) * 30);
+        if (cap === 1) return 800;
+        if (cap === 2) return 550;
+        if (cap === 3) return 500;
+        return 350;
+    }
+
+    function dinhDangThoiGian(soGiay) {
+        const m = Math.floor(soGiay / 60).toString().padStart(2, '0');
+        const s = (soGiay % 60).toString().padStart(2, '0');
+        return `${m}:${s}`;
+    }
+
+    function capNhatDongHo() {
+        if (dangChoi && !dangDung && !ketThuc) {
+            giayDaChoi++;
+            phanTuThoiGian.textContent = dinhDangThoiGian(giayDaChoi);
+        }
+    }
+
+    // ============================================================
+    // Quản lý Cấp độ (Hiển thị Cột Trái gọn gàng, không banner)
+    // ============================================================
+
+    function datCapDo(cap, khoiDongLai = true) {
+        capDo = cap;
+        boDemIcon = {};
+        boSuuTapDaCo.clear();
+
+        [tabLvl1, tabLvl2, tabLvl3].forEach((tab, idx) => {
+            if (tab) tab.classList.toggle('active', idx + 1 === cap);
+        });
+
+        if (cap === 1) {
+            mucTieuDiem = 1000;
+            sectionIconList.classList.add('hidden');
+            sectionMission.classList.remove('hidden');
+            boxDaoPhim.classList.add('hidden');
+
+            missionTitle.textContent     = 'NHIỆM VỤ MÀN 1';
+            missionDesc.textContent      = 'Chinh phục 1000 điểm để mở khóa Màn 2: Thử thách Đảo Phím!';
+            missionGoalLabel.textContent = 'Mục tiêu điểm';
+            capNhatHelpText(false);
+        } else if (cap === 2) {
+            mucTieuDiem = 2000;
+            sectionIconList.classList.add('hidden');
+            sectionMission.classList.remove('hidden');
+            boxDaoPhim.classList.remove('hidden'); // Cảnh báo nằm gọn trong cột trái
+
+            missionTitle.textContent     = 'THỬ THÁCH MÀN 2';
+            missionDesc.textContent      = 'Phím bấm Trái và Phải đã bị đảo ngược! Vượt qua 2000 điểm để mở khóa Màn 3!';
+            missionGoalLabel.textContent = 'Mục tiêu điểm';
+            capNhatHelpText(true);
+        } else if (cap === 3) {
+            mucTieuDiem = 10;
+            sectionIconList.classList.remove('hidden');
+            sectionMission.classList.add('hidden');
+            boxDaoPhim.classList.add('hidden');
+
+            capNhatGiaoDien10Icon();
+            capNhatHelpText(false);
+        }
+
+        tocDoRoi = layTocDoRoi(cap);
+
+        if (khoiDongLai) {
+            batDauGame();
+        } else {
+            capNhatGiaoDien();
+        }
+    }
+
+    function capNhatHelpText(laDaoPhim) {
+        if (laDaoPhim) {
+            huongDanPhim.innerHTML = `
+                <div class="help-item help-inverted-hint"><span>← (Trái)</span> : Sang PHẢI ➔</div>
+                <div class="help-item help-inverted-hint"><span>→ (Phải)</span> : Sang TRÁI ⬅</div>
+                <div class="help-item"><span>↑</span> : Xoay khối gạch</div>
+                <div class="help-item"><span>↓</span> : Rơi nhanh (Soft drop)</div>
+                <div class="help-item"><span>Shift / Space</span> : Thả rơi liền</div>
+                <div class="help-item"><span>P</span> : Tạm dừng</div>
+            `;
+        } else {
+            huongDanPhim.innerHTML = `
+                <div class="help-item"><span>← →</span> : Sang trái / phải</div>
+                <div class="help-item"><span>↑</span> : Xoay khối gạch</div>
+                <div class="help-item"><span>↓</span> : Rơi nhanh (Soft drop)</div>
+                <div class="help-item"><span>Shift / Space</span> : Thả rơi liền</div>
+                <div class="help-item"><span>P</span> : Tạm dừng</div>
+                <div class="help-item"><span>M</span> : Bật/Tắt âm thanh</div>
+            `;
+        }
+    }
+
+    /** Cập nhật 10 hàng icon trong Cột Trái (Chuẩn ảnh mẫu 1) */
+    function capNhatGiaoDien10Icon() {
+        const soLoai = boSuuTapDaCo.size;
+        iconProgressBadge.textContent = `${soLoai}/10`;
+
+        DANH_SACH_10_ICON.forEach(item => {
+            const rowEl   = document.getElementById(`row-${item.id}`);
+            const countEl = document.getElementById(`count-${item.id}`);
+            const soLuong = boDemIcon[item.id] || 0;
+
+            if (countEl) countEl.textContent = soLuong;
+
+            if (rowEl) {
+                if (soLuong > 0) {
+                    rowEl.classList.add('collected');
+                } else {
+                    rowEl.classList.remove('collected');
+                }
+            }
+        });
+    }
+
+    function hienThiToast(noiDung, loai = 'moi') {
+        if (!toastQua) return;
+        clearTimeout(timerTimeoutToast);
+
+        toastQua.textContent = noiDung;
+        toastQua.className   = `fruit-toast ${loai === 'moi' ? '' : 'toast-dup'}`;
+
+        timerTimeoutToast = setTimeout(() => {
+            toastQua.classList.add('hidden');
+        }, 2200);
     }
 
     // ============================================================
     // Tạo lưới & Khởi tạo khối
     // ============================================================
 
-    /** Tạo lưới trống (mảng 2D toàn số 0) */
     function taoLuoi() {
         return Array.from({ length: SO_HANG }, () => Array(SO_COT).fill(0));
     }
 
-    /**
-     * Lấy loại khối tiếp theo theo thuật toán 7-Bag:
-     * trộn ngẫu nhiên 7 loại rồi lấy từng cái ra
-     */
+    function taoLuoiIcon() {
+        return Array.from({ length: SO_HANG }, () => Array(SO_COT).fill(null));
+    }
+
     function layLoaiKhoiTiep() {
         if (tuiKhoi.length === 0) {
             tuiKhoi = [1, 2, 3, 4, 5, 6, 7];
-            // Trộn ngẫu nhiên (Fisher-Yates)
             for (let i = tuiKhoi.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
                 [tuiKhoi[i], tuiKhoi[j]] = [tuiKhoi[j], tuiKhoi[i]];
@@ -212,25 +386,47 @@
         return tuiKhoi.pop();
     }
 
-    /** Tạo đối tượng khối từ loại khối */
+    /**
+     * Tạo đối tượng khối:
+     * - Ở Màn 3: Tần suất ~42% có icon, 58% không có icon.
+     * - Random ngẫu nhiên 1 trong 10 loại icon (có thể ra lại loại đã có).
+     */
     function taoKhoi(loai) {
         const hinh = HINH_KHOI[loai].map(hang => [...hang]);
+        const N = hinh.length;
+        const iconGrid = Array.from({ length: N }, () => Array(N).fill(null));
+
+        if (capDo === 3) {
+            const coIcon = Math.random() < 0.42;
+            if (coIcon) {
+                const oHopLe = [];
+                for (let r = 0; r < N; r++) {
+                    for (let c = 0; c < N; c++) {
+                        if (hinh[r][c] !== 0) oHopLe.push({ r, c });
+                    }
+                }
+
+                if (oHopLe.length > 0) {
+                    const oChon = oHopLe[Math.floor(Math.random() * oHopLe.length)];
+                    const item = DANH_SACH_10_ICON[Math.floor(Math.random() * DANH_SACH_10_ICON.length)];
+                    iconGrid[oChon.r][oChon.c] = item.icon;
+                }
+            }
+        }
+
         return {
             loai,
             hinh,
+            iconGrid,
             x: Math.floor((SO_COT - hinh[0].length) / 2),
             y: 0
         };
     }
 
     // ============================================================
-    // Kiểm tra va chạm
+    // Kiểm tra va chạm & Điều khiển (Đảo phím ở Level 2)
     // ============================================================
 
-    /**
-     * Trả về true nếu khối ở vị trí (piece.x + lệchX, piece.y + lệchY)
-     * bị chạm tường hoặc chạm ô đã bị chiếm.
-     */
     function vaChạm(khoi, lệchX = 0, lệchY = 0, hinhKiemTra = null) {
         const hinh = hinhKiemTra || khoi.hinh;
         for (let h = 0; h < hinh.length; h++) {
@@ -238,21 +434,18 @@
                 if (!hinh[h][c]) continue;
                 const nx = khoi.x + c + lệchX;
                 const ny = khoi.y + h + lệchY;
-                // Chạm tường trái/phải hoặc đáy
                 if (nx < 0 || nx >= SO_COT || ny >= SO_HANG) return true;
-                // Chạm ô đã bị chiếm (bỏ qua các ô phía trên bảng)
                 if (ny >= 0 && luoi[ny][nx] !== 0) return true;
             }
         }
         return false;
     }
 
-    // ============================================================
-    // Điều khiển khối
-    // ============================================================
+    function coTheDieuKhien() {
+        return dangChoi && !dangDung && !ketThuc && khoiHienTai;
+    }
 
-    /** Di chuyển khối sang trái */
-    function diTrai() {
+    function diTraiThucTe() {
         if (!coTheDieuKhien()) return;
         if (!vaChạm(khoiHienTai, -1, 0)) {
             khoiHienTai.x--;
@@ -261,8 +454,7 @@
         }
     }
 
-    /** Di chuyển khối sang phải */
-    function diPhai() {
+    function diPhaiThucTe() {
         if (!coTheDieuKhien()) return;
         if (!vaChạm(khoiHienTai, 1, 0)) {
             khoiHienTai.x++;
@@ -271,20 +463,41 @@
         }
     }
 
-    /** Xoay khối (kèm wall kick để tránh kẹt tường) */
+    function diTrai() {
+        if (capDo === 2) diPhaiThucTe();
+        else diTraiThucTe();
+    }
+
+    function diPhai() {
+        if (capDo === 2) diTraiThucTe();
+        else diPhaiThucTe();
+    }
+
+    function xoayMaTran(m, fillValue = 0) {
+        const N      = m.length;
+        const ketQua = Array.from({ length: N }, () => Array(N).fill(fillValue));
+        for (let h = 0; h < N; h++) {
+            for (let c = 0; c < N; c++) {
+                ketQua[c][N - 1 - h] = m[h][c];
+            }
+        }
+        return ketQua;
+    }
+
     function xoayKhoi() {
         if (!coTheDieuKhien()) return;
-        if (khoiHienTai.loai === 4) return; // Khối O hình vuông — không cần xoay
+        if (khoiHienTai.loai === 4) return;
 
-        const hinhXoay = xoayMaTran(khoiHienTai.hinh);
-        // Các lệch thử (wall kick): thẳng, trái, phải, trái 2, phải 2, lên
+        const hinhXoay = xoayMaTran(khoiHienTai.hinh, 0);
+        const iconXoay = xoayMaTran(khoiHienTai.iconGrid, null);
         const cachKick = [[0,0], [-1,0], [1,0], [-2,0], [2,0], [0,-1]];
 
         for (const [lx, ly] of cachKick) {
             if (!vaChạm(khoiHienTai, lx, ly, hinhXoay)) {
-                khoiHienTai.hinh  = hinhXoay;
-                khoiHienTai.x    += lx;
-                khoiHienTai.y    += ly;
+                khoiHienTai.hinh     = hinhXoay;
+                khoiHienTai.iconGrid = iconXoay;
+                khoiHienTai.x       += lx;
+                khoiHienTai.y       += ly;
                 amXoay();
                 ve();
                 return;
@@ -292,17 +505,6 @@
         }
     }
 
-    /** Xoay ma trận 90° theo chiều kim đồng hồ */
-    function xoayMaTran(m) {
-        const N      = m.length;
-        const ketQua = Array.from({ length: N }, () => Array(N).fill(0));
-        for (let h = 0; h < N; h++)
-            for (let c = 0; c < N; c++)
-                ketQua[c][N - 1 - h] = m[h][c];
-        return ketQua;
-    }
-
-    /** Rơi tự động (gọi bởi vòng lặp game) */
     function roi() {
         if (!coTheDieuKhien()) return;
         if (!vaChạm(khoiHienTai, 0, 1)) {
@@ -314,12 +516,11 @@
         }
     }
 
-    /** Rơi nhanh (Soft Drop — nhấn ↓) */
     function roiNhanh() {
         if (!coTheDieuKhien()) return;
         if (!vaChạm(khoiHienTai, 0, 1)) {
             khoiHienTai.y++;
-            congDiem(1); // 1 điểm/ô khi soft drop
+            congDiem(1);
             amDiChuyen();
             doDem = 0;
             ve();
@@ -328,7 +529,6 @@
         }
     }
 
-    /** Thả rơi ngay (Hard Drop — nhấn Space) */
     function roiNgay() {
         if (!coTheDieuKhien()) return;
         let soO = 0;
@@ -336,29 +536,15 @@
             khoiHienTai.y++;
             soO++;
         }
-        congDiem(soO * 2); // 2 điểm/ô khi hard drop
+        congDiem(soO * 2);
         amRoi();
         khoaKhoi();
     }
 
-    /** Kiểm tra có thể điều khiển khối không */
-    function coTheDieuKhien() {
-        return dangChoi && !dangDung && !ketThuc && khoiHienTai;
-    }
-
-    /** Lấy vị trí Y của khối bóng (ghost piece — hiện vị trí sẽ rơi) */
-    function layYKhoiBong() {
-        if (!khoiHienTai) return 0;
-        let gy = khoiHienTai.y;
-        while (!vaChạm(khoiHienTai, 0, gy - khoiHienTai.y + 1)) gy++;
-        return gy;
-    }
-
     // ============================================================
-    // Khóa khối vào lưới & Xóa hàng
+    // Khóa khối, Xóa hàng & Xử lý thu thập 10 Icon
     // ============================================================
 
-    /** Khóa khối hiện tại vào lưới, sau đó xóa hàng & spawn khối mới */
     function khoaKhoi() {
         amRoi();
         for (let h = 0; h < khoiHienTai.hinh.length; h++) {
@@ -366,110 +552,169 @@
                 if (!khoiHienTai.hinh[h][c]) continue;
                 const ly = khoiHienTai.y + h;
                 const lx = khoiHienTai.x + c;
-                // Khóa phía trên bảng → game over
-                if (ly < 0) { kichHoatGameOver(); return; }
+                if (ly < 0) {
+                    kichHoatGameOver();
+                    return;
+                }
                 luoi[ly][lx] = khoiHienTai.hinh[h][c];
+                if (khoiHienTai.iconGrid && khoiHienTai.iconGrid[h][c]) {
+                    luoiIcon[ly][lx] = khoiHienTai.iconGrid[h][c];
+                }
             }
         }
         xoaHangDay();
         taoKhoiMoi();
     }
 
-    /** Quét & xóa các hàng đã đầy, tính điểm tương ứng */
     function xoaHangDay() {
         let soHangXoa = 0;
+        const iconThuThapTrongLuot = [];
+
         for (let h = SO_HANG - 1; h >= 0; h--) {
             if (luoi[h].every(o => o !== 0)) {
-                luoi.splice(h, 1);                    // Xóa hàng
-                luoi.unshift(Array(SO_COT).fill(0));  // Thêm hàng trống lên đầu
+                for (let c = 0; c < SO_COT; c++) {
+                    if (luoiIcon[h][c]) {
+                        iconThuThapTrongLuot.push(luoiIcon[h][c]);
+                    }
+                }
+
+                luoi.splice(h, 1);
+                luoi.unshift(Array(SO_COT).fill(0));
+                luoiIcon.splice(h, 1);
+                luoiIcon.unshift(Array(SO_COT).fill(null));
+
                 soHangXoa++;
-                h++; // Kiểm tra lại cùng vị trí sau khi dịch
+                h++;
             }
         }
+
         if (soHangXoa === 0) return;
 
         soHang += soHangXoa;
-
-        // Bảng điểm chuẩn Tetris: 1=100, 2=300, 3=500, 4=800 (nhân cấp độ)
         const bangDiem = [0, 100, 300, 500, 800];
         congDiem((bangDiem[soHangXoa] || soHangXoa * 200) * capDo);
         amXoaHang(soHangXoa);
+
+        // Xử lý thu thập icon ở Màn 3
+        if (capDo === 3 && iconThuThapTrongLuot.length > 0) {
+            xuLyThuThap10Icon(iconThuThapTrongLuot);
+        }
+
         capNhatGiaoDien();
     }
 
-    // ============================================================
-    // Điểm số & Cập nhật giao diện
-    // ============================================================
+    function xuLyThuThap10Icon(icons) {
+        for (const icon of icons) {
+            const item = DANH_SACH_10_ICON.find(q => q.icon === icon);
+            if (!item) continue;
 
-    /** Cộng điểm & kiểm tra điều kiện chiến thắng Level 1 */
-    function congDiem(soLuong) {
-        diem += soLuong;
-        capNhatGiaoDien();
-        // Điều kiện chiến thắng Level 1: đạt 1000 điểm
-        if (capDo === 1 && diem >= 1000 && !level1HoanThanh) {
-            xuLyChienThangLevel1();
+            const daCoTruoc = boSuuTapDaCo.has(item.id);
+            boDemIcon[item.id] = (boDemIcon[item.id] || 0) + 1;
+
+            if (!daCoTruoc) {
+                boSuuTapDaCo.add(item.id);
+                amSao();
+                capNhatGiaoDien10Icon();
+                hienThiToast(`🎉 Mở khóa mới: ${item.icon} ${item.ten}! (${boSuuTapDaCo.size}/10)`, 'moi');
+
+                if (boSuuTapDaCo.size >= 10) {
+                    setTimeout(() => {
+                        xuLyChienThangLevel3();
+                    }, 350);
+                    break;
+                }
+            } else {
+                congDiem(200);
+                capNhatGiaoDien10Icon();
+                hienThiToast(`Thu hoạch ${item.icon} ${item.ten} (+200đ)`, 'trung');
+            }
         }
     }
 
-    /** Cập nhật tất cả số liệu hiển thị trên màn hình */
+    // ============================================================
+    // Điểm số & Giao diện
+    // ============================================================
+
+    function congDiem(soLuong) {
+        diem += soLuong;
+        capNhatGiaoDien();
+
+        if (capDo === 1 && diem >= 1000) {
+            xuLyChienThangLevel(1);
+        } else if (capDo === 2 && diem >= 2000) {
+            xuLyChienThangLevel(2);
+        }
+    }
+
     function capNhatGiaoDien() {
-        phanTuDiem.textContent        = diem.toLocaleString();
-        phanTuHang.textContent        = soHang;
-        phanTuCap.textContent         = capDo;
-        phanTuDiemHienTai.textContent = diem.toLocaleString();
-        phanTuMucTieu.textContent     = mucTieuDiem.toLocaleString();
-        const phanTram                = Math.min(100, Math.floor(diem / mucTieuDiem * 100));
-        thanhTienTrinh.style.width    = phanTram + '%';
+        phanTuDiem.textContent = diem.toLocaleString();
+        phanTuHang.textContent = soHang;
+        phanTuCap.textContent  = capDo;
+
+        if (capDo === 1 || capDo === 2) {
+            missionGoalVal.textContent = `${diem.toLocaleString()} / ${mucTieuDiem.toLocaleString()}`;
+            const phanTram = Math.min(100, Math.floor((diem / mucTieuDiem) * 100));
+            leftProgressFill.style.width = phanTram + '%';
+        }
     }
 
     // ============================================================
-    // Chiến thắng Level 1 & Game Over
+    // Chiến thắng & Game Over
     // ============================================================
 
-    /** Xử lý khi đạt mốc 1000 điểm — hiện modal chiến thắng */
-    function xuLyChienThangLevel1() {
-        level1HoanThanh = true;
-        dangDung        = true;
+    function xuLyChienThangLevel(levelVuaQua) {
+        dangDung = true;
         cancelAnimationFrame(idFrame);
-
         amChienThang();
         batConfetti();
 
         modalDiemCT.textContent = diem.toLocaleString();
         modalHangCT.textContent = soHang;
+
+        if (levelVuaQua === 1) {
+            modalTieuDe.textContent = 'Chúc mừng bạn đã chinh phục Level 1!';
+            modalMoTa.innerHTML = 'Bạn đã đạt mốc 1000 điểm của Level 1!<br>Sẵn sàng bước vào <strong>Level 2: Thử thách Đảo Phím</strong> chưa?';
+            nutLevelTiep.textContent = 'Chơi Level 2: Đảo Phím ➔';
+        } else if (levelVuaQua === 2) {
+            modalTieuDe.textContent = 'Tuyệt vời! Bạn đã vượt qua Level 2!';
+            modalMoTa.innerHTML = 'Bạn đã làm chủ cơ chế Đảo Phím với 2000 điểm!<br>Bước tiếp theo: <strong>Màn 3 - Thu Thập 10 Loại Icon</strong>!';
+            nutLevelTiep.textContent = 'Chơi Màn 3: Thu Thập Icon 🍓';
+        }
+
         modalChienThang.classList.remove('hidden');
     }
 
-    /** Người dùng chọn "Tiếp tục" — đóng modal, chơi tiếp cùng level */
+    function xuLyChienThangLevel3() {
+        dangDung = true;
+        cancelAnimationFrame(idFrame);
+        amChienThang();
+        batConfetti();
+
+        questWinDiem.textContent     = diem.toLocaleString();
+        questWinHang.textContent     = soHang;
+        questWinThoiGian.textContent = dinhDangThoiGian(giayDaChoi);
+        modalQuestWin.classList.remove('hidden');
+    }
+
     function chonTiepTuc() {
         modalChienThang.classList.add('hidden');
         xoaConfetti();
-        dangDung        = false;
-        thoiGianTruoc   = performance.now();
-        idFrame         = requestAnimationFrame(vongLapGame);
-    }
-
-    /** Người dùng chọn "Chơi level tiếp theo" — chuyển sang Level 2 */
-    function chonLevelTiep() {
-        modalChienThang.classList.add('hidden');
-        xoaConfetti();
-
-        capDo       = 2;
-        mucTieuDiem = 2500; // Mục tiêu điểm cho Level 2
-        tocDoRoi    = layTocDoRoi(capDo);
-
-        const nhan = document.querySelector('.progress-label span:first-child');
-        if (nhan) nhan.textContent = 'Tiến trình Level ' + capDo;
-
-        amChienThang();
-        capNhatGiaoDien();
-
         dangDung      = false;
         thoiGianTruoc = performance.now();
         idFrame       = requestAnimationFrame(vongLapGame);
     }
 
-    /** Kích hoạt trạng thái Game Over */
+    function chonLevelTiep() {
+        modalChienThang.classList.add('hidden');
+        xoaConfetti();
+
+        if (capDo === 1) {
+            datCapDo(2, true);
+        } else if (capDo === 2) {
+            datCapDo(3, true);
+        }
+    }
+
     function kichHoatGameOver() {
         ketThuc   = true;
         dangChoi  = false;
@@ -479,101 +724,157 @@
         goDiem.textContent = diem.toLocaleString();
         goHang.textContent = soHang;
         modalGameOver.classList.remove('hidden');
-
         nutBatDau.textContent = '▶ Bắt đầu lại';
     }
 
     // ============================================================
-    // Tạo khối mới (Spawn)
+    // Tạo Khối Mới & Preview
     // ============================================================
 
-    /** Lấy khối tiếp theo từ túi, kiểm tra game over nếu bị chặn */
     function taoKhoiMoi() {
         if (!khoiTiepTheo) khoiTiepTheo = taoKhoi(layLoaiKhoiTiep());
         khoiHienTai  = khoiTiepTheo;
         khoiTiepTheo = taoKhoi(layLoaiKhoiTiep());
 
-        // Nếu vị trí spawn bị chặn → game over
+        if (moTaKhoiTiep) {
+            let ten = TEN_KHOI[khoiTiepTheo.loai] || 'Khối Tetris';
+            let iconTrongKhoi = null;
+            if (khoiTiepTheo.iconGrid) {
+                for (let r = 0; r < khoiTiepTheo.iconGrid.length; r++) {
+                    for (let c = 0; c < khoiTiepTheo.iconGrid[r].length; c++) {
+                        if (khoiTiepTheo.iconGrid[r][c]) {
+                            iconTrongKhoi = khoiTiepTheo.iconGrid[r][c];
+                            break;
+                        }
+                    }
+                    if (iconTrongKhoi) break;
+                }
+            }
+            if (iconTrongKhoi) {
+                const item = DANH_SACH_10_ICON.find(q => q.icon === iconTrongKhoi);
+                moTaKhoiTiep.textContent = `${ten} (${iconTrongKhoi} ${item ? item.ten : ''})`;
+            } else {
+                moTaKhoiTiep.textContent = ten;
+            }
+        }
+
         if (vaChạm(khoiHienTai)) {
             kichHoatGameOver();
             return;
         }
+
         veKhoiXemTruoc();
     }
 
     // ============================================================
-    // Vẽ (Rendering)
+    // Vẽ (Rendering) — ĐÃ ẨN HOÀN TOÀN ĐƯỜNG ĐI CUỐI CÙNG (GHOST PIECE)
     // ============================================================
 
     /**
-     * Vẽ một ô khối lên canvas
-     * @param {CanvasRenderingContext2D} ctx - context canvas
-     * @param {number} x - cột
-     * @param {number} y - hàng
-     * @param {number} mauId - chỉ số màu (1-7)
-     * @param {number} kichThuoc - kích thước ô (px)
-     * @param {boolean} laBong - true = vẽ bóng mờ (ghost piece)
+     * Vẽ Huy Hiệu Bo Tròn (Badge) cho từng loại Icon
+     * Chuẩn theo ảnh mẫu 1 của người dùng
      */
-    function veO(ctx, x, y, mauId, kichThuoc, laBong = false) {
+    function veHuyHieuIcon(ctx, px, py, kichThuoc, icon) {
+        const item = DANH_SACH_10_ICON.find(q => q.icon === icon) || { mau: '#ff2d78', bg: '#2b0938' };
+        const margin = Math.max(2, Math.round(kichThuoc * 0.1));
+        const bx = px + margin;
+        const by = py + margin;
+        const bw = kichThuoc - margin * 2;
+        const bh = kichThuoc - margin * 2;
+        const r  = Math.max(3, Math.round(kichThuoc * 0.18));
+
+        ctx.save();
+
+        // 1. Bo tròn góc
+        ctx.beginPath();
+        if (ctx.roundRect) {
+            ctx.roundRect(bx, by, bw, bh, r);
+        } else {
+            ctx.moveTo(bx + r, by);
+            ctx.arcTo(bx + bw, by, bx + bw, by + bh, r);
+            ctx.arcTo(bx + bw, by + bh, bx, by + bh, r);
+            ctx.arcTo(bx, by + bh, bx, by, r);
+            ctx.arcTo(bx, by, bx + bw, by, r);
+        }
+        ctx.closePath();
+
+        // 2. Nền huy hiệu tương phản
+        ctx.fillStyle = item.bg;
+        ctx.fill();
+
+        // 3. Viền huy hiệu màu dạ quang theo icon
+        ctx.lineWidth   = Math.max(1.8, Math.round(kichThuoc * 0.08));
+        ctx.strokeStyle = item.mau;
+        ctx.shadowColor = item.mau;
+        ctx.shadowBlur  = 5;
+        ctx.stroke();
+
+        // 4. Vẽ icon ở giữa
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.7)';
+        ctx.shadowBlur  = 3;
+        const fontSize  = Math.round(bw * 0.68);
+        ctx.font        = `${fontSize}px "Segoe UI Emoji", "Apple Color Emoji", "Noto Color Emoji", sans-serif`;
+        ctx.textAlign   = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.fillText(icon, bx + bw / 2, by + bh / 2 + 1);
+
+        ctx.restore();
+    }
+
+    /** Vẽ một ô khối lên canvas (Không còn bóng mờ) */
+    function veO(ctx, x, y, mauId, kichThuoc, icon = null) {
         const mau = BANG_MAU[mauId];
         if (!mau) return;
 
         const px = x * kichThuoc;
         const py = y * kichThuoc;
 
-        if (laBong) {
-            // Vẽ khối bóng (ghost): chỉ viền mờ
-            ctx.save();
-            ctx.strokeStyle = mau.sang;
-            ctx.lineWidth   = 1.5;
-            ctx.strokeRect(px + 1.5, py + 1.5, kichThuoc - 3, kichThuoc - 3);
-            ctx.fillStyle   = 'rgba(188,254,254,0.06)';
-            ctx.fillRect(px + 2, py + 2, kichThuoc - 4, kichThuoc - 4);
-            ctx.restore();
-            return;
-        }
-
         ctx.save();
 
-        // 1. Nền khối màu chính
+        // 1. Thân khối màu chính
         ctx.fillStyle = mau.chinh;
         ctx.fillRect(px + 1, py + 1, kichThuoc - 2, kichThuoc - 2);
 
-        // 2. Highlight góc trên-trái (hiệu ứng 3D giả)
+        // 2. Viền sáng góc trên-trái (3D Bevel)
         ctx.fillStyle = mau.sang;
         ctx.beginPath();
-        ctx.moveTo(px + 1,           py + 1);
-        ctx.lineTo(px + kichThuoc-1, py + 1);
-        ctx.lineTo(px + kichThuoc-4, py + 4);
-        ctx.lineTo(px + 4,           py + 4);
-        ctx.lineTo(px + 4,           py + kichThuoc-4);
-        ctx.lineTo(px + 1,           py + kichThuoc-1);
+        ctx.moveTo(px + 1,            py + 1);
+        ctx.lineTo(px + kichThuoc - 1, py + 1);
+        ctx.lineTo(px + kichThuoc - 4, py + 4);
+        ctx.lineTo(px + 4,            py + 4);
+        ctx.lineTo(px + 4,            py + kichThuoc - 4);
+        ctx.lineTo(px + 1,            py + kichThuoc - 1);
         ctx.closePath();
         ctx.fill();
 
-        // 3. Bóng tối góc dưới-phải
+        // 3. Góc tối dưới-phải
         ctx.fillStyle = mau.toi;
         ctx.beginPath();
-        ctx.moveTo(px + kichThuoc-1, py + 1);
-        ctx.lineTo(px + kichThuoc-1, py + kichThuoc-1);
-        ctx.lineTo(px + 1,           py + kichThuoc-1);
-        ctx.lineTo(px + 4,           py + kichThuoc-4);
-        ctx.lineTo(px + kichThuoc-4, py + kichThuoc-4);
-        ctx.lineTo(px + kichThuoc-4, py + 4);
+        ctx.moveTo(px + kichThuoc - 1, py + 1);
+        ctx.lineTo(px + kichThuoc - 1, py + kichThuoc - 1);
+        ctx.lineTo(px + 1,            py + kichThuoc - 1);
+        ctx.lineTo(px + 4,            py + kichThuoc - 4);
+        ctx.lineTo(px + kichThuoc - 4, py + kichThuoc - 4);
+        ctx.lineTo(px + kichThuoc - 4, py + 4);
         ctx.closePath();
         ctx.fill();
 
-        // 4. Ánh sáng trung tâm nhỏ
-        ctx.fillStyle = 'rgba(255,255,255,0.18)';
+        // 4. Highlight bóng nhẹ ở tâm
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.18)';
         ctx.fillRect(px + 6, py + 6, kichThuoc - 12, kichThuoc - 12);
+
+        // 5. Nếu ô có icon: Vẽ Huy Hiệu Bo Tròn nổi bật
+        if (icon) {
+            veHuyHieuIcon(ctx, px, py, kichThuoc, icon);
+        }
 
         ctx.restore();
     }
 
-    /** Vẽ lưới ô mờ làm nền bảng chơi */
     function veLuoiNen() {
-        ngCanhBang.strokeStyle = 'rgba(12,87,118,0.3)';
+        ngCanhBang.strokeStyle = 'rgba(12, 87, 118, 0.22)';
         ngCanhBang.lineWidth   = 0.5;
+
         for (let c = 0; c <= SO_COT; c++) {
             ngCanhBang.beginPath();
             ngCanhBang.moveTo(c * KICH_THUOC_O, 0);
@@ -588,66 +889,83 @@
         }
     }
 
-    /** Vẽ toàn bộ bảng chơi: lưới nền + các ô đã khóa + bóng + khối hiện tại */
+    /**
+     * Vẽ toàn bộ bảng chơi:
+     * ĐÃ ẨN HOÀN TOÀN ĐƯỜNG ĐI CUỐI CÙNG (GHOST PIECE) THEO YÊU CẦU NGƯỜI DÙNG!
+     */
     function ve() {
         ngCanhBang.clearRect(0, 0, canvasBang.width, canvasBang.height);
         veLuoiNen();
 
-        // Vẽ các ô đã được khóa vào lưới
-        for (let h = 0; h < SO_HANG; h++)
-            for (let c = 0; c < SO_COT; c++)
-                if (luoi[h][c]) veO(ngCanhBang, c, h, luoi[h][c], KICH_THUOC_O);
-
-        // Vẽ khối bóng (ghost) & khối đang rơi
-        if (khoiHienTai && dangChoi && !ketThuc) {
-            const yBong = layYKhoiBong();
-            const hinh  = khoiHienTai.hinh;
-
-            // Vẽ bóng nếu không trùng vị trí khối thật
-            if (yBong !== khoiHienTai.y) {
-                for (let h = 0; h < hinh.length; h++)
-                    for (let c = 0; c < hinh[h].length; c++)
-                        if (hinh[h][c])
-                            veO(ngCanhBang, khoiHienTai.x + c, yBong + h, hinh[h][c], KICH_THUOC_O, true);
+        // Vẽ các ô đã cố định trên bảng
+        for (let h = 0; h < SO_HANG; h++) {
+            for (let c = 0; c < SO_COT; c++) {
+                if (luoi[h][c]) {
+                    veO(ngCanhBang, c, h, luoi[h][c], KICH_THUOC_O, luoiIcon ? luoiIcon[h][c] : null);
+                }
             }
+        }
 
-            // Vẽ khối thật
-            for (let h = 0; h < hinh.length; h++)
-                for (let c = 0; c < hinh[h].length; c++)
-                    if (hinh[h][c])
-                        veO(ngCanhBang, khoiHienTai.x + c, khoiHienTai.y + h, hinh[h][c], KICH_THUOC_O);
+        // Vẽ khối thật đang rơi (KHÔNG VẼ BÓNG/ĐIỂM RƠI CUỐI CÙNG NỮA)
+        if (khoiHienTai && dangChoi && !ketThuc) {
+            const hinh = khoiHienTai.hinh;
+            for (let h = 0; h < hinh.length; h++) {
+                for (let c = 0; c < hinh[h].length; c++) {
+                    if (hinh[h][c]) {
+                        const icon = khoiHienTai.iconGrid ? khoiHienTai.iconGrid[h][c] : null;
+                        veO(ngCanhBang, khoiHienTai.x + c, khoiHienTai.y + h, hinh[h][c], KICH_THUOC_O, icon);
+                    }
+                }
+            }
         }
     }
 
-    /** Vẽ khối xem trước (preview) trong ô nhỏ bên phải */
     function veKhoiXemTruoc() {
         ngCanhKhoi.clearRect(0, 0, canvasKhoi.width, canvasKhoi.height);
         if (!khoiTiepTheo) return;
 
-        const hinh   = khoiTiepTheo.hinh;
-        const rong   = hinh[0].length * KICH_THUOC_XEM;
-        const cao    = hinh.length    * KICH_THUOC_XEM;
+        const hinh    = khoiTiepTheo.hinh;
+        const rong    = hinh[0].length * KICH_THUOC_XEM;
+        const cao     = hinh.length    * KICH_THUOC_XEM;
         const batDauX = Math.floor((canvasKhoi.width  - rong) / (2 * KICH_THUOC_XEM));
         const batDauY = Math.floor((canvasKhoi.height - cao)  / (2 * KICH_THUOC_XEM));
 
-        for (let h = 0; h < hinh.length; h++)
-            for (let c = 0; c < hinh[h].length; c++)
-                if (hinh[h][c])
-                    veO(ngCanhKhoi, batDauX + c, batDauY + h, hinh[h][c], KICH_THUOC_XEM);
+        for (let h = 0; h < hinh.length; h++) {
+            for (let c = 0; c < hinh[h].length; c++) {
+                if (hinh[h][c]) {
+                    const icon = khoiTiepTheo.iconGrid ? khoiTiepTheo.iconGrid[h][c] : null;
+                    veO(ngCanhKhoi, batDauX + c, batDauY + h, hinh[h][c], KICH_THUOC_XEM, icon);
+                }
+            }
+        }
     }
 
     // ============================================================
-    // Vòng lặp game chính
+    // Vòng lặp Game & Điều khiển
     // ============================================================
 
-    function vongLapGame(thoiGian = 0) {
+    function vongLapGame(thoiGian) {
         if (!dangChoi || dangDung || ketThuc) return;
 
-        const dt        = thoiGian - thoiGianTruoc;
-        thoiGianTruoc   = thoiGian;
+        const bayGio = (typeof thoiGian === 'number' && thoiGian > 0) ? thoiGian : performance.now();
+        if (!thoiGianTruoc) thoiGianTruoc = bayGio;
 
-        doDem += dt;
-        if (doDem > tocDoRoi) {
+        const dt = bayGio - thoiGianTruoc;
+        thoiGianTruoc = bayGio;
+
+        // An toàn chống NaN và giới hạn dt hợp lý khi giật lag
+        if (!isNaN(dt) && dt > 0) {
+            doDem = (typeof doDem === 'number' && !isNaN(doDem) ? doDem : 0) + Math.min(dt, 250);
+        } else {
+            doDem = (typeof doDem === 'number' && !isNaN(doDem) ? doDem : 0);
+        }
+
+        // Luôn đảm bảo có tốc độ rơi hợp lệ cho từng màn
+        const tocDoHienTai = (typeof tocDoRoi === 'number' && !isNaN(tocDoRoi) && tocDoRoi > 0)
+            ? tocDoRoi
+            : layTocDoRoi(capDo || 1);
+
+        if (doDem >= tocDoHienTai) {
             roi();
             doDem = 0;
         }
@@ -656,21 +974,17 @@
         idFrame = requestAnimationFrame(vongLapGame);
     }
 
-    // ============================================================
-    // Bắt đầu / Tạm dừng / Đặt lại game
-    // ============================================================
-
-    /** Đặt lại toàn bộ và bắt đầu ván mới */
     function batDauGame() {
         khoiTaoAm();
 
         luoi            = taoLuoi();
+        luoiIcon        = taoLuoiIcon();
         diem            = 0;
         soHang          = 0;
-        capDo           = 1;
-        mucTieuDiem     = 1000;
-        level1HoanThanh = false;
-        tocDoRoi        = layTocDoRoi(1);
+        giayDaChoi      = 0;
+        phanTuThoiGian.textContent = '00:00';
+        boDemIcon       = {};
+        boSuuTapDaCo.clear();
         tuiKhoi         = [];
         khoiTiepTheo    = null;
         khoiHienTai     = null;
@@ -678,26 +992,30 @@
         dangDung        = false;
         ketThuc         = false;
         doDem           = 0;
+        tocDoRoi        = layTocDoRoi(capDo || 1); // Đảm bảo tốc độ rơi luôn được thiết lập
 
         modalChienThang.classList.add('hidden');
+        modalQuestWin.classList.add('hidden');
         modalGameOver.classList.add('hidden');
         thongBaoBang.classList.remove('visible');
+        if (toastQua) toastQua.classList.add('hidden');
         xoaConfetti();
 
-        const nhan = document.querySelector('.progress-label span:first-child');
-        if (nhan) nhan.textContent = 'Tiến trình Level 1';
-
         capNhatGiaoDien();
+        if (capDo === 3) capNhatGiaoDien10Icon();
+
         taoKhoiMoi();
-        taoKhoiMoi(); // Gọi 2 lần: lần 1 → khoiHienTai, lần 2 → khoiTiepTheo
+        taoKhoiMoi();
 
         nutBatDau.textContent = '⏸ Tạm dừng';
         thoiGianTruoc = performance.now();
         cancelAnimationFrame(idFrame);
         idFrame = requestAnimationFrame(vongLapGame);
+
+        clearInterval(idIntervalTimer);
+        idIntervalTimer = setInterval(capNhatDongHo, 1000);
     }
 
-    /** Chuyển đổi trạng thái tạm dừng / tiếp tục */
     function togDung() {
         if (!dangChoi || ketThuc) return;
         dangDung = !dangDung;
@@ -713,15 +1031,10 @@
         }
     }
 
-    // ============================================================
-    // Hiệu ứng Confetti khi chiến thắng
-    // ============================================================
-
-    /** Tạo 60 mảnh confetti rơi ngẫu nhiên */
     function batConfetti() {
         xoaConfetti();
-        const mauSac = ['#00F0FF','#BCFEFE','#2D99AE','#F8DAD0','#FFD700','#FF5252','#AB47BC'];
-        for (let i = 0; i < 60; i++) {
+        const mauSac = ['#00F0FF', '#7C3AED', '#FFD54F', '#FFA726', '#FF5252', '#FF2D78', '#26A69A'];
+        for (let i = 0; i < 70; i++) {
             const manh = document.createElement('div');
             manh.className               = 'confetti-piece';
             manh.style.left              = Math.random() * 100 + 'vw';
@@ -732,41 +1045,51 @@
         }
     }
 
-    /** Xóa tất cả mảnh confetti khỏi DOM */
     function xoaConfetti() {
         document.querySelectorAll('.confetti-piece').forEach(el => el.remove());
     }
 
     // ============================================================
-    // Gắn sự kiện (Event Listeners)
+    // Event Listeners
     // ============================================================
 
-    // Nút Bắt đầu / Tạm dừng
+    tabLvl1.addEventListener('click', () => datCapDo(1, true));
+    tabLvl2.addEventListener('click', () => datCapDo(2, true));
+    tabLvl3.addEventListener('click', () => datCapDo(3, true));
+
     nutBatDau.addEventListener('click', () => {
         if (!dangChoi || ketThuc) batDauGame();
         else togDung();
     });
 
-    // Nút bật/tắt âm thanh
     nutAmThanh.addEventListener('click', () => {
         khoiTaoAm();
-        batAmThanh           = !batAmThanh;
+        batAmThanh             = !batAmThanh;
         nutAmThanh.textContent = batAmThanh ? '🔊' : '🔇';
     });
 
-    // Modal chiến thắng — 2 lựa chọn
-    nutTiepTuc.addEventListener('click',   chonTiepTuc);
+    nutTiepTuc.addEventListener('click', chonTiepTuc);
     nutLevelTiep.addEventListener('click', chonLevelTiep);
 
-    // Modal game over
-    nutChoiLai.addEventListener('click', batDauGame);
+    nutQuestChoiLai.addEventListener('click', () => {
+        modalQuestWin.classList.add('hidden');
+        xoaConfetti();
+        datCapDo(3, true);
+    });
+    nutQuestVeDau.addEventListener('click', () => {
+        modalQuestWin.classList.add('hidden');
+        xoaConfetti();
+        datCapDo(1, true);
+    });
 
-    // Phím bấm bàn phím
+    nutChoiLai.addEventListener('click', () => {
+        batDauGame();
+    });
+
     window.addEventListener('keydown', (e) => {
         khoiTaoAm();
 
-        // Ngăn cuộn trang khi dùng phím mũi tên & Space
-        if (['ArrowUp','ArrowDown','ArrowLeft','ArrowRight',' '].includes(e.key)) {
+        if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' ', 'Shift'].includes(e.key) || e.key === 'Shift') {
             e.preventDefault();
         }
 
@@ -780,39 +1103,22 @@
 
         if (!dangChoi || dangDung || ketThuc) return;
 
+        // Phím Shift hoặc Phím Space: Thả rơi liền ngay lập tức (Hard drop)
+        if (e.key === 'Shift' || e.code === 'ShiftLeft' || e.code === 'ShiftRight' || e.key === ' ') {
+            roiNgay();
+            return;
+        }
+
         switch (e.key) {
             case 'ArrowLeft':  case 'a': case 'A': diTrai();    break;
             case 'ArrowRight': case 'd': case 'D': diPhai();    break;
             case 'ArrowUp':    case 'w': case 'W': xoayKhoi();  break;
             case 'ArrowDown':  case 's': case 'S': roiNhanh();  break;
-            case ' ':                               roiNgay();   break;
         }
     });
 
-    // Điều khiển cảm ứng (mobile / tablet)
-    let camX = 0, camY = 0;
-
-    canvasBang.addEventListener('touchstart', (e) => {
-        khoiTaoAm();
-        camX = e.touches[0].clientX;
-        camY = e.touches[0].clientY;
-    }, { passive: true });
-
-    canvasBang.addEventListener('touchend', (e) => {
-        const dx = e.changedTouches[0].clientX - camX;
-        const dy = e.changedTouches[0].clientY - camY;
-
-        if (Math.abs(dx) < 15 && Math.abs(dy) < 15) {
-            xoayKhoi();                          // Chạm nhẹ → xoay
-        } else if (Math.abs(dx) > Math.abs(dy)) {
-            if (dx > 25)  diPhai();              // Vuốt phải
-            if (dx < -25) diTrai();              // Vuốt trái
-        } else {
-            if (dy > 30) roiNhanh();             // Vuốt xuống → rơi nhanh
-        }
-    }, { passive: true });
-
-    // Vẽ màn hình trống lúc mới tải trang
+    // Khởi tạo ban đầu
+    datCapDo(1, false);
     ve();
     veKhoiXemTruoc();
     capNhatGiaoDien();
