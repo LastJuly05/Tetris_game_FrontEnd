@@ -5,1570 +5,614 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <title>Game Xếp Gạch Tetris</title>
-    <!-- Bootstrap 5 & Bootstrap Icons -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.2/css/all.min.css">
     <style>
-/* ================================================
-   TETRIS - style.css
-   Giao diện đơn giản, không hiệu ứng hover, không chuyển cảnh
-   ================================================ */
-
-:root {
-    --bg: #f0f2f5;
-    --surface: #ffffff;
-    --border: #ced4da;
-    --border-dark: #343a40;
-    --text: #212529;
-    --text-muted: #6c757d;
-    --primary: #0d6efd;
-    --success-bg: #d1e7dd;
-    --success-text: #0f5132;
-}
-
-*,
-*::before,
-*::after {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
-}
-
-html,
-body {
-    height: 100%;
-    margin: 0;
-    padding: 0;
-}
-
-body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    overflow: hidden;
-    padding: 10px;
-}
-
-.hidden {
-    display: none !important;
-}
-
-/* ================================================
-   MENU CHỌN MÀN
-   ================================================ */
-
-.main-menu-container {
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    width: 100%;
-    max-width: 500px;
-    max-height: 96vh;
-    overflow-y: auto;
-}
-
-.menu-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 20px;
-    width: 100%;
-}
-
-.menu-header {
-    text-align: center;
-    margin-bottom: 16px;
-    padding-bottom: 10px;
-    border-bottom: 1px solid var(--border);
-}
-
-.game-logo {
-    font-size: 1.6rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 4px;
-}
-
-.game-tagline {
-    font-size: 0.85rem;
-    color: var(--text-muted);
-    margin: 0;
-}
-
-.level-cards {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.level-select-card {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    background: #ffffff;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 10px 12px;
-    cursor: pointer;
-}
-
-.lvl-card-icon {
-    width: 32px;
-    height: 32px;
-    border-radius: 4px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 1rem;
-    font-weight: 700;
-    background: #e9ecef;
-    color: #495057;
-    flex-shrink: 0;
-    border: 1px solid var(--border);
-}
-
-.lvl-card-content {
-    flex: 1;
-}
-
-.lvl-card-title {
-    font-size: 0.95rem;
-    font-weight: 600;
-    color: var(--text);
-    margin: 0 0 2px 0;
-}
-
-.lvl-card-desc {
-    font-size: 0.78rem;
-    color: var(--text-muted);
-    line-height: 1.3;
-    margin: 0;
-}
-
-.btn-play-level {
-    padding: 6px 12px;
-    font-size: 0.8rem;
-    font-weight: 500;
-    border: 1px solid #0b5ed7;
-    border-radius: 4px;
-    background: var(--primary);
-    color: #ffffff;
-    cursor: pointer;
-    white-space: nowrap;
-}
-
-/* ================================================
-   MÀN HÌNH CHƠI GAME
-   ================================================ */
-
-.game-container {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 6px;
-    width: 100%;
-    max-width: 780px;
-    max-height: 98vh;
-}
-
-.game-top-bar {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    width: 100%;
-    padding: 0 2px;
-}
-
-.btn-back-menu {
-    display: inline-flex;
-    align-items: center;
-    gap: 6px;
-    background: #ffffff;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 4px 10px;
-    font-size: 0.8rem;
-    color: var(--text);
-    cursor: pointer;
-}
-
-.current-level-tag {
-    background: #ffffff;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 4px 10px;
-    font-size: 0.8rem;
-    font-weight: 600;
-    color: var(--text);
-}
-
-.game-layout {
-    display: flex;
-    gap: 10px;
-    align-items: flex-start;
-    justify-content: center;
-    width: 100%;
-}
-
-/* CỘT TRÁI */
-.left-panel {
-    width: 210px;
-    height: 604px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 10px;
-    display: flex;
-    flex-direction: column;
-}
-
-.panel-section {
-    display: flex;
-    flex-direction: column;
-    height: 100%;
-}
-
-.panel-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding-bottom: 6px;
-    margin-bottom: 6px;
-    border-bottom: 1px solid var(--border);
-}
-
-.panel-header .title {
-    font-size: 0.75rem;
-    font-weight: 700;
-    color: #495057;
-}
-
-.panel-header .badge-progress {
-    background: #e9ecef;
-    color: #495057;
-    border: 1px solid var(--border);
-    padding: 1px 5px;
-    border-radius: 2px;
-    font-size: 0.72rem;
-    font-weight: 700;
-}
-
-.icon-rows {
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    flex: 1;
-    justify-content: space-between;
-}
-
-.icon-row {
-    display: flex;
-    align-items: center;
-    padding: 3px 6px;
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 3px;
-}
-
-.icon-row.collected {
-    background: var(--success-bg);
-    border-color: #badbcc;
-    color: var(--success-text);
-}
-
-.icon-badge {
-    width: 20px;
-    height: 20px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 0.95rem;
-    flex-shrink: 0;
-}
-
-.icon-name {
-    flex: 1;
-    margin-left: 6px;
-    font-size: 0.75rem;
-    color: inherit;
-}
-
-.icon-count {
-    font-size: 0.78rem;
-    font-weight: 600;
-    color: inherit;
-}
-
-.mission-section {
-    gap: 10px;
-}
-
-.alert-inverted-box {
-    background: #fff3cd;
-    border: 1px solid #ffecb5;
-    border-radius: 4px;
-    padding: 8px;
-    color: #664d03;
-}
-
-.alert-inverted-head {
-    font-size: 0.78rem;
-    font-weight: 700;
-    margin-bottom: 2px;
-}
-
-.alert-inverted-desc {
-    font-size: 0.72rem;
-    line-height: 1.3;
-}
-
-.alert-obstacle-box {
-    background: #fff3e0;
-    border: 1px solid #ffb74d;
-    border-radius: 4px;
-    padding: 8px;
-    color: #e65100;
-}
-
-.alert-obstacle-head {
-    font-size: 0.78rem;
-    font-weight: 700;
-    margin-bottom: 2px;
-    color: #bf360c;
-}
-
-.alert-obstacle-desc {
-    font-size: 0.72rem;
-    line-height: 1.35;
-    color: #4e342e;
-}
-
-.alert-blind-box {
-    background: #e7f1ff;
-    border: 1px solid #b6d4fe;
-    border-radius: 4px;
-    padding: 8px;
-    color: #084298;
-}
-
-.alert-blind-head {
-    font-size: 0.78rem;
-    font-weight: 700;
-    margin-bottom: 2px;
-}
-
-.alert-blind-desc {
-    font-size: 0.72rem;
-    line-height: 1.3;
-}
-
-.alert-survival-box {
-    background: #ffebe9;
-    border: 1px solid #ffc1ba;
-    border-radius: 4px;
-    padding: 8px;
-    color: #b02a37;
-}
-
-.alert-survival-head {
-    font-size: 0.78rem;
-    font-weight: 700;
-    margin-bottom: 2px;
-}
-
-.alert-survival-desc {
-    font-size: 0.72rem;
-    line-height: 1.3;
-}
-
-.mission-body {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-}
-
-.mission-desc {
-    font-size: 0.78rem;
-    color: var(--text);
-    line-height: 1.3;
-    background: #f8f9fa;
-    padding: 8px;
-    border-radius: 4px;
-    border: 1px solid var(--border);
-    margin: 0;
-}
-
-.mission-progress-box {
-    background: #f8f9fa;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 8px;
-}
-
-.mission-label {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    margin-bottom: 4px;
-}
-
-.mission-label strong {
-    color: var(--text);
-}
-
-.progress-bar-bg {
-    height: 6px;
-    background: #dee2e6;
-    border-radius: 3px;
-    overflow: hidden;
-}
-
-.progress-bar-fill {
-    height: 100%;
-    width: 0%;
-    background: var(--primary);
-}
-
-/* CỘT GIỮA */
-.board-column {
-    display: flex;
-    justify-content: center;
-}
-
-.board-wrapper {
-    border: 2px solid var(--border-dark);
-    background: #ffffff;
-    border-radius: 2px;
-    position: relative;
-    width: 304px;
-    height: 604px;
-}
-
-#board {
-    display: block;
-    background: #ffffff;
-}
-
-.board-message {
-    position: absolute;
-    inset: 0;
-    background: rgba(255, 255, 255, 0.9);
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 4px;
-    opacity: 0;
-    pointer-events: none;
-}
-
-.board-message.visible {
-    opacity: 1;
-    pointer-events: auto;
-}
-
-.board-message h3 {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--text);
-}
-
-.board-message p {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-}
-
-/* CỘT PHẢI */
-.right-panel {
-    width: 190px;
-    height: 604px;
-    display: flex;
-    flex-direction: column;
-    gap: 6px;
-}
-
-.side-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 6px 8px;
-}
-
-.next-box {
-    text-align: center;
-}
-
-.box-title {
-    font-size: 0.7rem;
-    font-weight: 700;
-    color: #495057;
-    margin-bottom: 4px;
-    text-transform: uppercase;
-}
-
-#next {
-    display: block;
-    margin: 0 auto;
-    background: #f8f9fa;
-    border: 1px solid #e9ecef;
-    border-radius: 2px;
-}
-
-.next-desc {
-    font-size: 0.72rem;
-    color: var(--text-muted);
-    margin-top: 3px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.score-box {
-    text-align: center;
-    padding: 6px;
-}
-
-.score-label {
-    font-size: 0.68rem;
-    font-weight: 600;
-    color: var(--text-muted);
-    text-transform: uppercase;
-}
-
-.score-val {
-    font-size: 1.4rem;
-    font-weight: 700;
-    color: var(--text);
-    line-height: 1.1;
-    margin-top: 2px;
-}
-
-.mini-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 4px;
-}
-
-.stat-item {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 4px 6px;
-    text-align: center;
-}
-
-.stat-item:nth-child(3) {
-    grid-column: span 2;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 4px 8px;
-}
-
-.stat-item span {
-    font-size: 0.68rem;
-    color: var(--text-muted);
-}
-
-.stat-item strong {
-    font-size: 0.9rem;
-    font-weight: 600;
-    color: var(--text);
-}
-
-.controls-row {
-    display: flex;
-}
-
-button {
-    padding: 7px 10px;
-    border: none;
-    border-radius: 4px;
-    font-family: inherit;
-    font-size: 0.82rem;
-    font-weight: 600;
-    cursor: pointer;
-}
-
-#start {
-    width: 100%;
-    background: var(--primary);
-    border: 1px solid #0b5ed7;
-    color: #ffffff;
-}
-
-.help {
-    background: #f8f9fa;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 6px 8px;
-    font-size: 0.7rem;
-    color: #495057;
-    display: flex;
-    flex-direction: column;
-    gap: 3px;
-    flex: 1;
-    justify-content: center;
-}
-
-.help-item span {
-    font-weight: 600;
-    color: var(--text);
-}
-
-/* MODALS */
-
-.modal-overlay {
-    position: fixed;
-    inset: 0;
-    background: rgba(0, 0, 0, 0.45);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    padding: 16px;
-    z-index: 100;
-}
-
-.modal-box {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 18px;
-    text-align: center;
-    width: 100%;
-    max-width: 360px;
-}
-
-.modal-box h2 {
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-bottom: 6px;
-}
-
-.modal-desc {
-    font-size: 0.8rem;
-    color: var(--text-muted);
-    line-height: 1.3;
-    margin-bottom: 12px;
-}
-
-.modal-stats {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 6px;
-    background: #f8f9fa;
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 8px;
-    margin-bottom: 12px;
-}
-
-.modal-stat-item span {
-    display: block;
-    font-size: 0.7rem;
-    color: var(--text-muted);
-}
-
-.modal-stat-item strong {
-    display: block;
-    font-size: 1.15rem;
-    font-weight: 700;
-    color: var(--text);
-    margin-top: 2px;
-}
-
-.modal-actions {
-    display: flex;
-    gap: 6px;
-}
-
-.modal-actions button {
-    flex: 1;
-    padding: 7px 10px;
-    font-size: 0.82rem;
-    border-radius: 4px;
-}
-
-.modal-actions-stacked {
-    display: flex;
-    flex-direction: column;
-    gap: 7px;
-    margin-bottom: 6px;
-}
-
-.modal-actions-stacked button {
-    width: 100%;
-    padding: 8px 12px;
-    font-size: 0.84rem;
-    font-weight: 600;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    gap: 6px;
-    border-radius: 4px;
-    cursor: pointer;
-    transition: filter 0.15s ease;
-}
-
-.modal-actions-stacked button:hover {
-    filter: brightness(0.95);
-}
-
-.modal-menu-action {
-    margin-top: 4px;
-}
-
-.btn-menu-link {
-    background: transparent;
-    border: none;
-    color: var(--text-muted);
-    font-size: 0.78rem;
-    padding: 4px 8px;
-    display: inline-flex;
-    align-items: center;
-    gap: 4px;
-    cursor: pointer;
-    font-weight: 500;
-}
-
-.btn-menu-link:hover {
-    color: var(--text);
-    text-decoration: underline;
-}
-
-.btn-primary {
-    background: var(--primary);
-    border: 1px solid #0b5ed7;
-    color: #ffffff;
-}
-
-.btn-secondary {
-    background: #f8f9fa;
-    color: var(--text);
-    border: 1px solid var(--border);
-}
-
-/* Lv Boss   */
-
-/* Card lv 7: boss */
-.boss-card {
-    background: linear-gradient(135deg, #18181b 0%, #2e1065 50%, #4c0519 100%) !important;
-    border: 1.5px solid #a855f7 !important;
-    box-shadow: 0 4px 16px rgba(168, 85, 247, 0.25);
-    position: relative;
-    overflow: hidden;
-}
-
-.boss-card:hover {
-    border-color: #ec4899 !important;
-    box-shadow: 0 6px 22px rgba(236, 72, 153, 0.35);
-    transform: translateY(-1px);
-}
-
-.boss-card-icon {
-    background: linear-gradient(135deg, #7e22ce, #be185d) !important;
-    color: #ffd700 !important;
-    border: 1px solid #c084fc !important;
-    font-size: 1.15rem !important;
-    text-shadow: 0 0 8px rgba(255, 215, 0, 0.6);
-}
-
-.boss-card-header {
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    margin-bottom: 2px;
-}
-
-.boss-card-title {
-    color: #f8fafc !important;
-    font-weight: 700;
-}
-
-.badge-boss-special {
-    background: linear-gradient(90deg, #dc2626, #9333ea);
-    color: #ffffff;
-    font-size: 0.65rem;
-    font-weight: 800;
-    padding: 2px 6px;
-    border-radius: 999px;
-    letter-spacing: 0.5px;
-    box-shadow: 0 0 8px rgba(220, 38, 38, 0.6);
-    animation: pulseBossBadge 1.5s infinite alternate;
-}
-
-@keyframes pulseBossBadge {
-    0% { transform: scale(0.95); opacity: 0.85; }
-    100% { transform: scale(1.05); opacity: 1; box-shadow: 0 0 12px rgba(236, 72, 153, 0.8); }
-}
-
-.boss-card .lvl-card-desc {
-    color: #cbd5e1 !important;
-}
-
-.btn-play-boss {
-    background: linear-gradient(135deg, #7c3aed, #db2777) !important;
-    border: 1px solid #f472b6 !important;
-    color: #ffffff !important;
-    font-weight: 700 !important;
-    box-shadow: 0 2px 8px rgba(219, 39, 119, 0.4);
-}
-
-.btn-play-boss:hover {
-    filter: brightness(1.15);
-    box-shadow: 0 4px 14px rgba(219, 39, 119, 0.6);
-}
-
-/* Panel riêng lv boss */
-.boss-battle-section {
-    background: #0f172a;
-    border: 1.5px solid #7c3aed;
-    border-radius: 4px;
-    padding: 10px;
-    color: #f8fafc;
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    height: 100%;
-    box-shadow: 0 0 20px rgba(124, 58, 237, 0.15) inset;
-}
-
-.boss-panel-header {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    padding-bottom: 6px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.boss-header-title {
-    font-size: 0.76rem;
-    font-weight: 800;
-    color: #f43f5e;
-    letter-spacing: 0.5px;
-}
-
-.boss-phase-tag {
-    font-size: 0.68rem;
-    font-weight: 700;
-    padding: 2px 6px;
-    border-radius: 3px;
-    text-transform: uppercase;
-}
-
-.boss-phase-tag.phase-1 {
-    background: #1e1b4b;
-    color: #a78bfa;
-    border: 1px solid #6366f1;
-}
-
-.boss-phase-tag.phase-2 {
-    background: #451a03;
-    color: #fb923c;
-    border: 1px solid #f97316;
-    animation: pulsePhase 1s infinite alternate;
-}
-
-.boss-phase-tag.phase-3 {
-    background: #4c0519;
-    color: #fda4af;
-    border: 1px solid #f43f5e;
-    animation: pulsePhase 0.5s infinite alternate;
-}
-
-@keyframes pulsePhase {
-    0% { filter: brightness(0.9); }
-    100% { filter: brightness(1.3); }
-}
-
-/* Avt boss */
-.boss-avatar-box {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    padding: 4px 0 2px 0;
-}
-
-.boss-cube-avatar {
-    width: 52px;
-    height: 52px;
-    background: linear-gradient(135deg, #1e1b4b, #311042);
-    border: 2px solid #8b5cf6;
-    border-radius: 6px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    position: relative;
-    box-shadow: 0 0 16px rgba(139, 92, 246, 0.5);
-    animation: bossFloat 3s ease-in-out infinite;
-    transition: transform 0.1s ease, border-color 0.2s ease;
-}
-
-@keyframes bossFloat {
-    0%, 100% { transform: translateY(0px); }
-    50% { transform: translateY(-3px); }
-}
-
-.boss-cube-avatar.hit-react {
-    transform: scale(0.92) rotate(-3deg);
-    border-color: #ef4444;
-    box-shadow: 0 0 24px #ef4444;
-    background: #7f1d1d;
-}
-
-.boss-eyes-icon {
-    font-size: 1.8rem;
-    filter: drop-shadow(0 0 6px rgba(244, 63, 94, 0.8));
-}
-
-.boss-name-label {
-    font-size: 0.68rem;
-    font-weight: 700;
-    color: #cbd5e1;
-    margin-top: 4px;
-    text-align: center;
-    letter-spacing: 0.3px;
-}
-
-/* boss hp*/
-.boss-hp-container {
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-    padding: 6px 8px;
-}
-
-.boss-hp-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    font-size: 0.7rem;
-    margin-bottom: 4px;
-}
-
-.boss-hp-title {
-    color: #f43f5e;
-    font-weight: 700;
-}
-
-.boss-hp-numbers {
-    color: #f8fafc;
-    font-weight: 800;
-}
-
-.boss-hp-track {
-    height: 12px;
-    background: #1e293b;
-    border-radius: 3px;
-    position: relative;
-    overflow: hidden;
-    border: 1px solid rgba(0, 0, 0, 0.4);
-}
-
-.boss-hp-damage-bar {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background: #f59e0b;
-    transition: width 0.5s ease-out;
-}
-
-.boss-hp-fill {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    background: linear-gradient(90deg, #8b5cf6, #ec4899);
-    transition: width 0.2s ease-in;
-    box-shadow: 0 0 8px rgba(236, 72, 153, 0.6);
-}
-
-.boss-hp-fill.phase-2 {
-    background: linear-gradient(90deg, #f59e0b, #ea580c);
-}
-
-.boss-hp-fill.phase-3 {
-    background: linear-gradient(90deg, #dc2626, #991b1b);
-}
-
-/* Boss phản cong bắng cách dâng hàng lên trên */
-.boss-counter-box {
-    background: rgba(15, 23, 42, 0.8);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 4px;
-    padding: 5px 8px;
-}
-
-.boss-counter-header {
-    display: flex;
-    justify-content: space-between;
-    font-size: 0.68rem;
-    margin-bottom: 3px;
-    color: #94a3b8;
-}
-
-.boss-counter-timer {
-    color: #38bdf8;
-    font-weight: 700;
-}
-
-.boss-counter-track {
-    height: 5px;
-    background: #1e293b;
-    border-radius: 2px;
-    overflow: hidden;
-}
-
-.boss-counter-fill {
-    height: 100%;
-    background: #38bdf8;
-    transition: width 0.2s linear;
-}
-
-.boss-counter-fill.warning {
-    background: #ef4444;
-    box-shadow: 0 0 6px #ef4444;
-}
-
-/* debuff trạng thái kỹ năng */
-.boss-status-badges {
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    min-height: 24px;
-}
-
-.boss-badge {
-    font-size: 0.65rem;
-    font-weight: 700;
-    padding: 3px 6px;
-    border-radius: 3px;
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    animation: pulseBadge 1s infinite alternate;
-}
-
-@keyframes pulseBadge {
-    0% { opacity: 0.85; }
-    100% { opacity: 1; }
-}
-
-.boss-badge.badge-shield {
-    background: #082f49;
-    color: #38bdf8;
-    border: 1px solid #0284c7;
-}
-
-.boss-badge.badge-lock {
-    background: #4c0519;
-    color: #fb7185;
-    border: 1px solid #f43f5e;
-}
-
-.boss-badge.badge-speed {
-    background: #422006;
-    color: #facc15;
-    border: 1px solid #eab308;
-}
-
-/* Bảng sát thương */
-.boss-dmg-guide {
-    background: rgba(15, 23, 42, 0.9);
-    border: 1px solid rgba(255, 255, 255, 0.08);
-    border-radius: 4px;
-    padding: 6px 8px;
-    font-size: 0.68rem;
-}
-
-.dmg-guide-title {
-    font-size: 0.65rem;
-    font-weight: 700;
-    color: #94a3b8;
-    margin-bottom: 4px;
-    text-transform: uppercase;
-}
-
-.dmg-guide-row {
-    display: flex;
-    justify-content: space-between;
-    padding: 2px 0;
-    border-bottom: 1px dashed rgba(255, 255, 255, 0.05);
-    color: #cbd5e1;
-}
-
-.dmg-guide-row:last-child {
-    border-bottom: none;
-}
-
-.dmg-guide-row strong {
-    color: #38bdf8;
-}
-
-.dmg-guide-row.crit {
-    color: #ffd700;
-    font-weight: 700;
-}
-
-.dmg-guide-row.crit strong {
-    color: #ff0055;
-    text-shadow: 0 0 6px rgba(255, 0, 85, 0.6);
-}
-
-/* time out */
-.boss-limit-timer {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    background: #1e1b4b;
-    border: 1px solid #4338ca;
-    border-radius: 4px;
-    padding: 5px 8px;
-    font-size: 0.72rem;
-    color: #c7d2fe;
-}
-
-.boss-limit-timer strong {
-    font-size: 0.85rem;
-    color: #ffffff;
-    letter-spacing: 1px;
-}
+       /*TETRIS - UI */
+
+        :root {
+            --bg: #f0f2f5;
+            --surface: #ffffff;
+            --border: #ced4da;
+            --text: #212529;
+            --muted: #6c757d;
+            --primary: #0d6efd;
+        }
+
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        html, body { height: 100%; }
+
+        /* Mặc định trước đây do Bootstrap (reboot) cung cấp - giữ lại để giao diện không thay đổi */
+        body { line-height: 1.5; -webkit-text-size-adjust: 100%; }
+        h1, h2, h3, h4, h5, h6 { margin-bottom: 0.5rem; font-weight: 500; line-height: 1.2; }
+        h3 { font-size: calc(1.3rem + 0.6vw); }
+        @media (min-width: 1200px) { h3 { font-size: 1.75rem; } }
+        p { margin-bottom: 1rem; }
+        b, strong { font-weight: bolder; }
+        small { font-size: 0.875em; }
+
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: system-ui, Arial, sans-serif;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            padding: 10px;
+        }
+
+        .hidden { display: none !important; }
+
+        button { padding: 7px 10px; border: 1px solid var(--border); border-radius: 4px; background: #f8f9fa; font: inherit; font-size: 0.82rem; cursor: pointer; }
+
+        .btn-primary { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .btn-secondary { background: #f8f9fa; color: var(--text); }
+
+        .box { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; }
+
+        /* MENU */
+        .main-menu-container { width: 100%; max-width: 500px; max-height: 96vh; overflow-y: auto; }
+        .menu-card { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 20px; width: 100%; }
+        .menu-header { text-align: center; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+        .game-logo { font-size: 1.6rem; }
+        .game-tagline { font-size: 0.85rem; color: var(--muted); }
+
+        .level-cards { display: flex; flex-direction: column; gap: 8px; }
+        .level-select-card { display: flex; align-items: center; gap: 12px; border: 1px solid var(--border); border-radius: 4px; padding: 10px 12px; cursor: pointer; }
+        .lvl-card-icon { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; font-weight: 700; background: #e9ecef; border: 1px solid var(--border); border-radius: 4px; flex-shrink: 0; }
+        .lvl-card-content { flex: 1; }
+        .lvl-card-title { font-size: 0.95rem; }
+        .lvl-card-desc { font-size: 0.78rem; color: var(--muted); }
+        .btn-play-level { background: var(--primary); border-color: var(--primary); color: #fff; font-size: 0.8rem; white-space: nowrap; }
+
+        /* GAME */
+        .game-container { display: flex; flex-direction: column; align-items: center; gap: 6px; width: 100%; max-width: 780px; }
+        .game-top-bar { display: flex; justify-content: space-between; align-items: center; width: 100%; }
+        .btn-back-menu, .current-level-tag { background: #fff; border: 1px solid var(--border); border-radius: 4px; padding: 4px 10px; font-size: 0.8rem; }
+        .quick-level-bar { display: flex; align-items: center; gap: 4px; width: 100%; font-size: 0.8rem; }
+        .quick-level-btn { padding: 3px 10px; background: #fff; }
+        .quick-level-btn.active { background: var(--primary); border-color: var(--primary); color: #fff; }
+        .game-layout { display: flex; gap: 10px; align-items: flex-start; justify-content: center; width: 100%; }
+
+        /* CỘT TRÁI */
+        .left-panel { width: 210px; height: 604px; background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 10px; display: flex; flex-direction: column; }
+        .panel-section { display: flex; flex-direction: column; height: 100%; }
+        .panel-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; margin-bottom: 6px; border-bottom: 1px solid var(--border); }
+        .panel-header .title { font-size: 0.75rem; font-weight: 700; }
+        .badge-progress { background: #e9ecef; border: 1px solid var(--border); padding: 1px 5px; font-size: 0.72rem; font-weight: 700; }
+
+        .icon-rows { display: flex; flex-direction: column; gap: 3px; flex: 1; justify-content: space-between; }
+        .icon-row { display: flex; align-items: center; padding: 3px 6px; background: #f8f9fa; border: 1px solid #e9ecef; }
+        .icon-row.collected { background: #d1e7dd; border-color: #badbcc; color: #0f5132; }
+        .icon-name { flex: 1; margin-left: 6px; font-size: 0.75rem; }
+        .icon-count { font-size: 0.78rem; }
+
+        .mission-section { gap: 10px; }
+        .alert-inverted-box, .alert-obstacle-box, .alert-blind-box, .alert-survival-box { background: #f8f9fa; border: 1px solid var(--border); border-radius: 4px; padding: 8px; }
+        .alert-inverted-head, .alert-obstacle-head, .alert-blind-head, .alert-survival-head { font-size: 0.78rem; font-weight: 700; margin-bottom: 2px; }
+        .alert-inverted-desc, .alert-obstacle-desc, .alert-blind-desc, .alert-survival-desc { font-size: 0.72rem; line-height: 1.3; }
+
+        .mission-body { display: flex; flex-direction: column; gap: 8px; }
+        .mission-desc, .mission-progress-box { font-size: 0.78rem; background: #f8f9fa; border: 1px solid var(--border); border-radius: 4px; padding: 8px; }
+        .mission-label { display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 4px; }
+        .progress-bar-bg { height: 6px; background: #dee2e6; }
+        .progress-bar-fill { height: 100%; width: 0%; background: var(--primary); }
+
+        /* CỘT GIỮA */
+        .board-wrapper { border: 2px solid #343a40; background: #fff; position: relative; width: 304px; height: 604px; }
+        #board { display: block; }
+        .board-message { position: absolute; inset: 0; background: rgba(255, 255, 255, 0.9); display: none; flex-direction: column; align-items: center; justify-content: center; gap: 4px; }
+        .board-message.visible { display: flex; }
+        .board-message p { font-size: 0.8rem; color: var(--muted); }
+
+        /* CỘT PHẢI */
+        .right-panel { width: 190px; height: 604px; display: flex; flex-direction: column; gap: 6px; }
+        .side-box { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; text-align: center; }
+        .box-title, .score-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; margin-bottom: 4px; }
+        #next { display: block; margin: 0 auto; background: #f8f9fa; border: 1px solid #e9ecef; }
+        .next-desc { font-size: 0.72rem; color: var(--muted); margin-top: 3px; }
+        .score-val { font-size: 1.4rem; font-weight: 700; }
+
+        .mini-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 4px; }
+        .stat-item { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 4px 6px; text-align: center; }
+        .stat-item:nth-child(3) { grid-column: span 2; display: flex; justify-content: space-between; }
+        .stat-item span { font-size: 0.68rem; color: var(--muted); }
+        .stat-item strong { font-size: 0.9rem; }
+
+        #start { width: 100%; background: var(--primary); border-color: var(--primary); color: #fff; }
+
+        .help { background: #f8f9fa; border: 1px solid var(--border); border-radius: 4px; padding: 6px 8px; font-size: 0.7rem; display: flex; flex-direction: column; gap: 3px; flex: 1; justify-content: center; }
+        .help-item span { font-weight: 600; }
+
+        /* MODAL */
+        .modal-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.45); display: flex; align-items: center; justify-content: center; padding: 16px; z-index: 100; }
+        .modal-box { background: var(--surface); border: 1px solid var(--border); border-radius: 4px; padding: 18px; text-align: center; width: 100%; max-width: 360px; }
+        .modal-box h2 { font-size: 1.15rem; margin-bottom: 6px; }
+        .modal-desc { font-size: 0.8rem; color: var(--muted); margin-bottom: 12px; }
+        .modal-stats { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; background: #f8f9fa; border: 1px solid var(--border); border-radius: 4px; padding: 8px; margin-bottom: 12px; }
+        .modal-stat-item span { display: block; font-size: 0.7rem; color: var(--muted); }
+        .modal-stat-item strong { display: block; font-size: 1.15rem; }
+        .modal-actions-stacked { display: flex; flex-direction: column; gap: 7px; margin-bottom: 6px; }
+        .modal-actions-stacked button { width: 100%; padding: 8px 12px; }
+        .modal-menu-action { margin-top: 4px; }
+        .btn-menu-link { background: transparent; border: none; color: var(--muted); font-size: 0.78rem; }
+
+        /* LV7 */
+        .boss-battle-section { background: #212529; border: 1px solid #495057; border-radius: 4px; padding: 10px; color: #f8f9fa; gap: 8px; }
+        .boss-panel-header { display: flex; justify-content: space-between; align-items: center; padding-bottom: 6px; border-bottom: 1px solid #495057; }
+        .boss-header-title { font-size: 0.76rem; font-weight: 700; color: #f43f5e; }
+        .boss-phase-tag { font-size: 0.68rem; font-weight: 700; padding: 2px 6px; border: 1px solid #6c757d; }
+        .boss-phase-tag.phase-2 { color: #fb923c; border-color: #fb923c; }
+        .boss-phase-tag.phase-3 { color: #fda4af; border-color: #f43f5e; }
+
+        .boss-avatar-box { display: flex; flex-direction: column; align-items: center; }
+        .boss-cube-avatar { width: 52px; height: 52px; border: 2px solid #8b5cf6; border-radius: 6px; display: flex; align-items: center; justify-content: center; }
+        .boss-cube-avatar.hit-react { border-color: #ef4444; background: #7f1d1d; }
+        .boss-eyes-icon { font-size: 1.8rem; }
+        .boss-cube-glow { display: none; }
+
+        .boss-hp-container, .boss-counter-box, .boss-dmg-guide { border: 1px solid #495057; border-radius: 4px; padding: 6px 8px; font-size: 0.7rem; }
+        .boss-hp-header, .boss-counter-header { display: flex; justify-content: space-between; margin-bottom: 4px; }
+        .boss-hp-track, .boss-counter-track { height: 10px; background: #495057; position: relative; overflow: hidden; }
+        .boss-hp-damage-bar { position: absolute; top: 0; left: 0; height: 100%; background: #f59e0b; }
+        .boss-hp-fill { position: absolute; top: 0; left: 0; height: 100%; background: #8b5cf6; }
+        .boss-hp-fill.phase-2 { background: #ea580c; }
+        .boss-hp-fill.phase-3 { background: #dc2626; }
+        .boss-counter-timer { color: #38bdf8; }
+        .boss-counter-fill { height: 100%; background: #38bdf8; }
+        .boss-counter-fill.warning { background: #ef4444; }
+
+        .boss-status-badges { display: flex; flex-direction: column; gap: 4px; min-height: 24px; }
+        .boss-badge { font-size: 0.65rem; font-weight: 700; padding: 3px 6px; border: 1px solid; }
+        .boss-badge.badge-shield { color: #38bdf8; }
+        .boss-badge.badge-speed { color: #facc15; }
+
+        .dmg-guide-title { font-weight: 700; margin-bottom: 4px; color: #adb5bd; }
+        .dmg-guide-row { display: flex; justify-content: space-between; padding: 2px 0; }
+        .dmg-guide-row.crit { color: #ffd700; font-weight: 700; }
+
+        .boss-limit-timer { display: flex; justify-content: space-between; align-items: center; border: 1px solid #495057; border-radius: 4px; padding: 5px 8px; font-size: 0.72rem; }
     </style>
 </head>
 
 <body>
 
-    <!-- ================================================
-     MÀN HÌNH MENU CHÍNH
-     ================================================ -->
-    <div id="main-menu" class="main-menu-container">
-        <div class="menu-card">
-            <div class="menu-header">
-                <h1 class="game-logo">XẾP GẠCH TETRIS</h1>
-                <p class="game-tagline">Chọn màn chơi bên dưới để bắt đầu:</p>
+
+<!-- UI Menu-->
+
+<div id="main-menu" class="main-menu-container">
+    <div class="menu-card">
+        <div class="menu-header">
+            <h1 class="game-logo">XẾP GẠCH TETRIS</h1>
+            <p class="game-tagline">Chọn màn chơi bên dưới để bắt đầu:</p>
+        </div>
+
+        <div class="level-cards">
+            <!-- Card lv 1 -->
+            <div class="level-select-card" data-level="1" id="card-lvl-1">
+                <div class="lvl-card-icon">1</div>
+                <div class="lvl-card-content">
+                    <h3 class="lvl-card-title">Màn 1: Thử Thách Cổ Điển</h3>
+                    <p class="lvl-card-desc">Cách chơi Tetris cơ bản. Mục tiêu: 1000 điểm.</p>
+                </div>
+                <button class="btn-play-level">Chơi ngay</button>
             </div>
 
-            <div class="level-cards">
-                <!-- Card Màn 1 -->
-                <div class="level-select-card" data-level="1" id="card-lvl-1">
-                    <div class="lvl-card-icon">1</div>
-                    <div class="lvl-card-content">
-                        <h3 class="lvl-card-title">Màn 1: Thử Thách Cổ Điển</h3>
-                        <p class="lvl-card-desc">Cách chơi Tetris cơ bản. Mục tiêu: 1000 điểm.</p>
-                    </div>
-                    <button class="btn-play-level">Chơi ngay</button>
+            <!-- Card lv 2 -->
+            <div class="level-select-card" data-level="2" id="card-lvl-2">
+                <div class="lvl-card-icon">2</div>
+                <div class="lvl-card-content">
+                    <h3 class="lvl-card-title">Màn 2: Thử Thách Đảo Ngược</h3>
+                    <p class="lvl-card-desc">Phím Trái và Phải bị đổi chỗ cho nhau. Mục tiêu: 2000 điểm.</p>
                 </div>
+                <button class="btn-play-level">Chơi ngay</button>
+            </div>
 
-                <!-- Card Màn 2 -->
-                <div class="level-select-card" data-level="2" id="card-lvl-2">
-                    <div class="lvl-card-icon">2</div>
-                    <div class="lvl-card-content">
-                        <h3 class="lvl-card-title">Màn 2: Thử Thách Đảo Ngược</h3>
-                        <p class="lvl-card-desc">Phím Trái và Phải bị đổi chỗ cho nhau. Mục tiêu: 2000 điểm.</p>
-                    </div>
-                    <button class="btn-play-level">Chơi ngay</button>
+            <!-- Card lv 3 -->
+            <div class="level-select-card" data-level="3" id="card-lvl-3">
+                <div class="lvl-card-icon">3</div>
+                <div class="lvl-card-content">
+                    <h3 class="lvl-card-title">Màn 3: Thử Thách Chướng Ngại Vật</h3>
+                    <p class="lvl-card-desc">Gạch ở đáy bảng, phá nó theo cách thông thường hoặc kích hoạt boom</p>
                 </div>
+                <button class="btn-play-level">Chơi ngay</button>
+            </div>
 
-                <!-- Card Màn 3 -->
-                <div class="level-select-card" data-level="3" id="card-lvl-3">
-                    <div class="lvl-card-icon">3</div>
-                    <div class="lvl-card-content">
-                        <h3 class="lvl-card-title">Màn 3: Thử Thách Chướng Ngại Vật</h3>
-                        <p class="lvl-card-desc">Gạch ở đáy bảng, phá nó theo cách thông thường hoặc kích hoạt boom</p>
-                    </div>
-                    <button class="btn-play-level">Chơi ngay</button>
+            <!-- Card lv 4 -->
+            <div class="level-select-card" data-level="4" id="card-lvl-4">
+                <div class="lvl-card-icon">4</div>
+                <div class="lvl-card-content">
+                    <h3 class="lvl-card-title">Màn 4: Thử Thách Thu Thập</h3>
+                    <p class="lvl-card-desc">Phá hàng chứa icon để gom đủ 10 loại khác nhau.</p>
                 </div>
+                <button class="btn-play-level">Chơi ngay</button>
+            </div>
 
-                <!-- Card Màn 4 -->
-                <div class="level-select-card" data-level="4" id="card-lvl-4">
-                    <div class="lvl-card-icon">4</div>
-                    <div class="lvl-card-content">
-                        <h3 class="lvl-card-title">Màn 4: Thử Thách Thu Thập</h3>
-                        <p class="lvl-card-desc">Phá hàng chứa icon để gom đủ 10 loại khác nhau.</p>
-                    </div>
-                    <button class="btn-play-level">Chơi ngay</button>
+            <!-- Card lv 5 -->
+            <div class="level-select-card" data-level="5" id="card-lvl-5">
+                <div class="lvl-card-icon">5</div>
+                <div class="lvl-card-content">
+                    <h3 class="lvl-card-title">Màn 5: Thử Thách Sinh Tồn</h3>
+                    <p class="lvl-card-desc">Tốc độ rơi siêu nhanh. Sống sót trong 2 phút để qua màn.</p>
                 </div>
+                <button class="btn-play-level">Chơi ngay</button>
+            </div>
 
-                <!-- Card Màn 5 -->
-                <div class="level-select-card" data-level="5" id="card-lvl-5">
-                    <div class="lvl-card-icon">5</div>
-                    <div class="lvl-card-content">
-                        <h3 class="lvl-card-title">Màn 5: Thử Thách Sinh Tồn</h3>
-                        <p class="lvl-card-desc">Tốc độ rơi siêu nhanh. Sống sót trong 2 phút để qua màn.</p>
-                    </div>
-                    <button class="btn-play-level">Chơi ngay</button>
+            <!-- Card lv 6 -->
+            <div class="level-select-card" data-level="6" id="card-lvl-6">
+                <div class="lvl-card-icon">6</div>
+                <div class="lvl-card-content">
+                    <h3 class="lvl-card-title">Màn 6: Thử Thách Ghi Nhớ</h3>
+                    <p class="lvl-card-desc">Gạch bên dưới bị ẩn. Thả rơi liền (Space/Shift) để hiện gạch 0.75s. Mục tiêu: 10000 điểm.</p>
                 </div>
+                <button class="btn-play-level">Chơi ngay</button>
+            </div>
 
-                <!-- Card Màn 6 -->
-                <div class="level-select-card" data-level="6" id="card-lvl-6">
-                    <div class="lvl-card-icon">6</div>
-                    <div class="lvl-card-content">
-                        <h3 class="lvl-card-title">Màn 6: Thử Thách Ghi Nhớ</h3>
-                        <p class="lvl-card-desc">Gạch bên dưới bị ẩn. Thả rơi liền (Space/Shift) để hiện gạch 0.75s. Mục tiêu: 10000 điểm.</p>
-                    </div>
-                    <button class="btn-play-level">Chơi ngay</button>
+            <!-- Card lv 7 -->
+            <div class="level-select-card" data-level="7" id="card-lvl-7">
+                <div class="lvl-card-icon">7</div>
+                <div class="lvl-card-content">
+                    <h3 class="lvl-card-title">Màn 7: Thử Thách Với Boss</h3>
+                    <p class="lvl-card-desc">Xóa hàng để tấn công Boss.</p>
                 </div>
-
-                <!-- Card Màn 7 -->
-                <div class="level-select-card" data-level="7" id="card-lvl-7">
-                    <div class="lvl-card-icon">7</div>
-                    <div class="lvl-card-content">
-                        <h3 class="lvl-card-title">Màn 7: Thử Thách Với Boss</h3>
-                        <p class="lvl-card-desc">Xóa hàng để tấn công Boss.</p>
-                    </div>
-                    <button class="btn-play-level">Chơi ngay</button>
-                </div>
+                <button class="btn-play-level">Chơi ngay</button>
             </div>
         </div>
     </div>
+</div>
 
-    <!-- ================================================
-     Ui Chính
-     ================================================ -->
-    <div class="game-container hidden" id="game-container">
-        <!-- Thanh top bar trong game: btn Menu -->
-        <div class="game-top-bar">
-            <button id="btn-back-menu" class="btn-back-menu">
-                <i class="bi bi-arrow-left"></i> Menu Chọn Màn
+<!-- Ui Chính -->
+<div class="game-container hidden" id="game-container">
+    <!-- Thanh top bar trong game: btn Menu -->
+    <div class="game-top-bar">
+        <button id="btn-back-menu" class="btn-back-menu">
+            <i class="fa-solid fa-arrow-left"></i> Menu Chọn Màn
+        </button>
+        <div class="current-level-tag" id="current-level-tag">
+            <span id="current-level-text">Màn 1: Thử Thách Cổ Điển</span>
+        </div>
+    </div>
+
+    <!-- Thanh chuyển nhanh màn chơi -->
+    <div class="quick-level-bar" id="quick-level-bar">
+        <span>Chuyển nhanh:</span>
+        <button class="quick-level-btn" data-level="1">1</button>
+        <button class="quick-level-btn" data-level="2">2</button>
+        <button class="quick-level-btn" data-level="3">3</button>
+        <button class="quick-level-btn" data-level="4">4</button>
+        <button class="quick-level-btn" data-level="5">5</button>
+        <button class="quick-level-btn" data-level="6">6</button>
+        <button class="quick-level-btn" data-level="7">7</button>
+    </div>
+
+    <!-- Khung trò chơi -->
+    <div class="game-layout">
+
+        <!-- CỘT TRÁI: Thông báo nv -->
+        <div class="left-panel" id="left-panel">
+
+            <!-- List 10 icon của panel bên trái -->
+            <div class="panel-section icon-list-section" id="icon-list-section">
+                <div class="panel-header">
+                    <span class="title">DANH SÁCH ICON <small>(10 LOẠI)</small></span>
+                    <span class="badge-progress" id="icon-progress-badge">0/10</span>
+                </div>
+                <div class="icon-rows" id="icon-rows">
+                    <div class="icon-row" id="row-heart" data-id="heart">
+                        <div class="icon-badge badge-heart">❤️</div>
+                        <span class="icon-name">Trái tim</span>
+                        <b class="icon-count" id="count-heart">0</b>
+                    </div>
+                    <div class="icon-row" id="row-crown" data-id="crown">
+                        <div class="icon-badge badge-crown">👑</div>
+                        <span class="icon-name">Vương miện</span>
+                        <b class="icon-count" id="count-crown">0</b>
+                    </div>
+                    <div class="icon-row" id="row-star" data-id="star">
+                        <div class="icon-badge badge-star">⭐</div>
+                        <span class="icon-name">Ngôi sao</span>
+                        <b class="icon-count" id="count-star">0</b>
+                    </div>
+                    <div class="icon-row" id="row-lightning" data-id="lightning">
+                        <div class="icon-badge badge-lightning">⚡</div>
+                        <span class="icon-name">Tia chớp</span>
+                        <b class="icon-count" id="count-lightning">0</b>
+                    </div>
+                    <div class="icon-row" id="row-diamond" data-id="diamond">
+                        <div class="icon-badge badge-diamond">💎</div>
+                        <span class="icon-name">Kim cương</span>
+                        <b class="icon-count" id="count-diamond">0</b>
+                    </div>
+                    <div class="icon-row" id="row-fire" data-id="fire">
+                        <div class="icon-badge badge-fire">🔥</div>
+                        <span class="icon-name">Lửa</span>
+                        <b class="icon-count" id="count-fire">0</b>
+                    </div>
+                    <div class="icon-row" id="row-snowflake" data-id="snowflake">
+                        <div class="icon-badge badge-snowflake">❄️</div>
+                        <span class="icon-name">Bông tuyết</span>
+                        <b class="icon-count" id="count-snowflake">0</b>
+                    </div>
+                    <div class="icon-row" id="row-leaf" data-id="leaf">
+                        <div class="icon-badge badge-leaf">🍃</div>
+                        <span class="icon-name">Lá cây</span>
+                        <b class="icon-count" id="count-leaf">0</b>
+                    </div>
+                    <div class="icon-row" id="row-water" data-id="water">
+                        <div class="icon-badge badge-water">💧</div>
+                        <span class="icon-name">Giọt nước</span>
+                        <b class="icon-count" id="count-water">0</b>
+                    </div>
+                    <div class="icon-row" id="row-strawberry" data-id="strawberry">
+                        <div class="icon-badge badge-strawberry">🍓</div>
+                        <span class="icon-name">Dâu tây</span>
+                        <b class="icon-count" id="count-strawberry">0</b>
+                    </div>
+                </div>
+            </div>
+
+            <!-- panel nv của lv1 -->
+            <div class="panel-section mission-section hidden" id="mission-section">
+                <div class="panel-header">
+                    <span class="title" id="mission-title">NHIỆM VỤ MÀN 1</span>
+                </div>
+                <!-- lv2 cảnh báo đảo nút di chuyển -->
+                <div class="alert-inverted-box hidden" id="alert-inverted-box">
+                    <div class="alert-inverted-head">
+                        <i class="fa-solid fa-triangle-exclamation"></i> THỬ THÁCH ĐẢO NGƯỢC
+                    </div>
+                    <div class="alert-inverted-desc">
+                        Nhấn <strong>TRÁI (←)</strong> khối đi sang <strong>PHẢI</strong><br>Nhấn <strong>PHẢI (→)</strong> khối đi sang <strong>TRÁI</strong>
+                    </div>
+                </div>
+
+                <!-- lv3 cánhr báochướng ngại -->
+                <div class="alert-obstacle-box hidden" id="alert-obstacle-box">
+                    <div class="alert-obstacle-head">
+                        <i class="fa-solid fa-trowel-bricks"></i> THỬ THÁCH CHƯỚNG NGẠI VẬT
+                    </div>
+                    <div class="alert-obstacle-desc">
+                        <strong>Gạch</strong>: Phá <strong>1 lần</strong> độ bền như gạch rơi<br>
+                        <strong>Bom</strong>: Gom từ <strong>3 quả Bom kề nhau</strong> sẽ kích hoạt <strong>Siêu Nổ 4x4</strong> quét sạch gạch<br>
+                        <strong>Dựa vào trọng lục </strong> : khối gạch không có liên kết sẽ tự động rơi nêu có sự liên kết rồi sẽ dừng lại
+                    </div>
+                </div>
+
+                <!-- lv5:cảnh báo sinh tônf 2p -->
+                <div class="alert-survival-box hidden" id="alert-survival-box">
+                    <div class="alert-survival-head">
+                        <i class="fa-solid fa-stopwatch"></i> THỬ THÁCH SINH TỒN
+                    </div>
+                    <div class="alert-survival-desc">
+                        Tốc độ rơi siêu nhanh (140ms)!<br>Sống sót liên tục trong <strong>2:00 phút</strong> để chiến thắng!
+                    </div>
+                </div>
+
+                <!-- lv6: khả năng ghi nhớ -->
+                <div class="alert-blind-box hidden" id="alert-blind-box">
+                    <div class="alert-blind-head">
+                        <i class="fa-solid fa-eye-slash"></i> THỬ THÁCH GHI NHỚ
+                    </div>
+                    <div class="alert-blind-desc">
+                        Gạch đã xếp bên dưới sẽ bị ẩn đi.<br>Nhấn <strong>Space / Shift</strong> (Thả rơi liền) để hiện toàn bộ gạch trong <strong>0.75 giây</strong>!
+                    </div>
+                </div>
+
+                <div class="mission-body">
+                    <p class="mission-desc" id="mission-desc">
+                        Đạt 1000 điểm để mở khóa Màn 2.
+                    </p>
+                    <div class="mission-progress-box">
+                        <div class="mission-label">
+                            <span id="mission-goal-label">Điểm mục tiêu</span>
+                            <strong id="mission-goal-val">0 / 1000</strong>
+                        </div>
+                        <div class="progress-bar-bg">
+                            <div class="progress-bar-fill" id="left-progress-fill"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!--Lv7: Thử thách siêu boss -->
+            <div class="panel-section boss-battle-section hidden" id="boss-battle-section">
+                <div class="boss-panel-header">
+                    <span class="boss-header-title"><i class="fa-solid fa-shield-halved"></i> MÀN 7: BOSS</span>
+                    <span class="boss-phase-tag phase-1" id="boss-phase-tag">GĐ 1: THĂM DÒ</span>
+                </div>
+
+                <!-- Avatar boss -->
+                <div class="boss-avatar-box" id="boss-avatar-box">
+                    <div class="boss-cube-avatar" id="boss-cube-avatar">
+                        <div class="boss-cube-glow"></div>
+                        <span class="boss-eyes-icon" id="boss-eyes-icon">😈</span>
+                    </div>
+                    <div class="boss-name-label"></div>
+                </div>
+
+                <!-- Thanh Máu Boss -->
+                <div class="boss-hp-container">
+                    <div class="boss-hp-header">
+                        <span class="boss-hp-title"><i class="fa-solid fa-heart-pulse"></i> HP BOSS</span>
+                        <strong class="boss-hp-numbers" id="boss-hp-numbers">100 / 100</strong>
+                    </div>
+                    <div class="boss-hp-track">
+                        <div class="boss-hp-damage-bar" id="boss-hp-damage-bar" style="width: 100%;"></div>
+                        <div class="boss-hp-fill" id="boss-hp-fill" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <!-- đéme ngược thời gian boss phản công -->
+                <div class="boss-counter-box">
+                    <div class="boss-counter-header">
+                        <span class="boss-counter-label"><i class="fa-solid fa-hourglass-half"></i> Phản công sau:</span>
+                        <strong class="boss-counter-timer" id="boss-counter-timer">20s</strong>
+                    </div>
+                    <div class="boss-counter-track">
+                        <div class="boss-counter-fill" id="boss-counter-fill" style="width: 100%;"></div>
+                    </div>
+                </div>
+
+                <!-- trạng thái boss dùng kỷ năng -->
+                <div class="boss-status-badges" id="boss-status-badges">
+                    <div class="boss-badge badge-shield hidden" id="badge-boss-shield">
+                        <i class="fa-solid fa-shield"></i> KHIÊN -50% DMG (<span id="shield-timer">6s</span>)
+                    </div>
+                    <div class="boss-badge badge-speed hidden" id="badge-boss-speed">
+                        <i class="fa-solid fa-bolt"></i> TĂNG TỐC ĐỘ!
+                    </div>
+                </div>
+
+                <!-- Bảng sát thương -->
+                <div class="boss-dmg-guide">
+                    <div class="dmg-guide-title">QUY TẮC SÁT THƯƠNG:</div>
+                    <div class="dmg-guide-row"><span>Phá 1 hàng</span><strong>-5 HP</strong></div>
+                    <div class="dmg-guide-row"><span>Phá 2 hàng</span><strong>-12 HP</strong></div>
+                    <div class="dmg-guide-row"><span>Phá 3 hàng</span><strong>-20 HP</strong></div>
+                    <div class="dmg-guide-row crit"><span>Phá 4 hàng (Tetris)</span><strong>⚡ -30 HP</strong></div>
+                </div>
+
+                <!-- timing out -->
+                <div class="boss-limit-timer">
+                    <span><i class="fa-solid fa-stopwatch"></i> Thời gian:</span>
+                    <strong id="boss-time-remaining">03:00</strong>
+                </div>
+            </div>
+
+        </div>
+
+        <!-- CỘT GIỮA -->
+        <div class="board-column">
+            <div class="board-wrapper">
+                <canvas id="board" width="300" height="600"></canvas>
+                <!-- Thông báo tạm dừng -->
+                <div id="board-message" class="board-message">
+                    <h3>TẠM DỪNG</h3>
+                    <p>Nhấn 'P' hoặc 'Tiếp tục' để chơi lại</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- CỘT PHẢI -->
+        <div class="right-panel">
+            <!-- Khối tiếp theo -->
+            <div class="side-box next-box">
+                <div class="box-title">KHỐI TIẾP THEO</div>
+                <canvas id="next" width="110" height="110"></canvas>
+                <div class="next-desc" id="next-desc">Khối chữ T</div>
+            </div>
+
+            <!-- Điểm số nổi bật -->
+            <div class="side-box score-box">
+                <div class="score-label">ĐIỂM SỐ</div>
+                <div class="score-val" id="score">0</div>
+            </div>
+
+            <!-- Thống kê nhỏ -->
+            <div class="mini-stats">
+                <div class="stat-item">
+                    <span>Thời gian</span>
+                    <strong id="game-time">00:00</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Hàng đã xóa</span>
+                    <strong id="lines">0</strong>
+                </div>
+                <div class="stat-item">
+                    <span>Màn chơi</span>
+                    <strong id="level">1</strong>
+                </div>
+            </div>
+
+            <!-- Nút điều khiển -->
+            <div class="controls-row">
+                <button id="start">▶ Bắt đầu</button>
+            </div>
+
+            <!-- Hướng dẫn phím -->
+            <div class="help" id="help-text">
+                <div class="help-item"><span>← →</span> : Sang trái / phải</div>
+                <div class="help-item"><span>↑</span> : Xoay khối gạch</div>
+                <div class="help-item"><span>↓</span> : Rơi nhanh (Soft drop)</div>
+                <div class="help-item"><span>Shift / Space</span> : Thả rơi liền</div>
+                <div class="help-item"><span>P</span> : Tạm dừng</div>
+            </div>
+        </div>
+
+    </div>
+</div>
+
+<!-- Modal Chiến Thắng -->
+<div id="victory-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h2 id="modal-title">Chiến thắng!</h2>
+        <p class="modal-desc" id="modal-desc">
+            Bạn đã hoàn thành mục tiêu của màn chơi.
+        </p>
+
+        <div class="modal-stats">
+            <div class="modal-stat-item">
+                <span>Điểm số</span>
+                <strong id="modal-score">0</strong>
+            </div>
+            <div class="modal-stat-item">
+                <span>Số hàng đã xóa</span>
+                <strong id="modal-lines">0</strong>
+            </div>
+        </div>
+
+        <div class="modal-actions modal-actions-stacked">
+            <button id="btn-continue" class="btn-secondary">
+                <i class="fa-solid fa-play"></i> Chơi tiếp
             </button>
-            <div class="current-level-tag" id="current-level-tag">
-                <span id="current-level-text">Màn 1: Thử Thách Cổ Điển</span>
-            </div>
+            <button id="btn-next-level" class="btn-primary">
+                <i class="fa-solid fa-circle-arrow-right"></i> Lv tiếp theo
+            </button>
+            <button id="btn-replay-level" class="btn-secondary">
+                <i class="fa-solid fa-arrow-rotate-right"></i> Chơi lại từ đầu
+            </button>
         </div>
-
-        <!-- Khung trò chơi -->
-        <div class="game-layout">
-
-            <!-- CỘT TRÁI: Thông báo nv -->
-            <div class="left-panel" id="left-panel">
-
-                <!-- List 10 icon của panel bên trái -->
-                <div class="panel-section icon-list-section" id="icon-list-section">
-                    <div class="panel-header">
-                        <span class="title">DANH SÁCH ICON <small>(10 LOẠI)</small></span>
-                        <span class="badge-progress" id="icon-progress-badge">0/10</span>
-                    </div>
-                    <div class="icon-rows" id="icon-rows">
-                        <div class="icon-row" id="row-heart" data-id="heart">
-                            <div class="icon-badge badge-heart">❤️</div>
-                            <span class="icon-name">Trái tim</span>
-                            <b class="icon-count" id="count-heart">0</b>
-                        </div>
-                        <div class="icon-row" id="row-crown" data-id="crown">
-                            <div class="icon-badge badge-crown">👑</div>
-                            <span class="icon-name">Vương miện</span>
-                            <b class="icon-count" id="count-crown">0</b>
-                        </div>
-                        <div class="icon-row" id="row-star" data-id="star">
-                            <div class="icon-badge badge-star">⭐</div>
-                            <span class="icon-name">Ngôi sao</span>
-                            <b class="icon-count" id="count-star">0</b>
-                        </div>
-                        <div class="icon-row" id="row-lightning" data-id="lightning">
-                            <div class="icon-badge badge-lightning">⚡</div>
-                            <span class="icon-name">Tia chớp</span>
-                            <b class="icon-count" id="count-lightning">0</b>
-                        </div>
-                        <div class="icon-row" id="row-diamond" data-id="diamond">
-                            <div class="icon-badge badge-diamond">💎</div>
-                            <span class="icon-name">Kim cương</span>
-                            <b class="icon-count" id="count-diamond">0</b>
-                        </div>
-                        <div class="icon-row" id="row-fire" data-id="fire">
-                            <div class="icon-badge badge-fire">🔥</div>
-                            <span class="icon-name">Lửa</span>
-                            <b class="icon-count" id="count-fire">0</b>
-                        </div>
-                        <div class="icon-row" id="row-snowflake" data-id="snowflake">
-                            <div class="icon-badge badge-snowflake">❄️</div>
-                            <span class="icon-name">Bông tuyết</span>
-                            <b class="icon-count" id="count-snowflake">0</b>
-                        </div>
-                        <div class="icon-row" id="row-leaf" data-id="leaf">
-                            <div class="icon-badge badge-leaf">🍃</div>
-                            <span class="icon-name">Lá cây</span>
-                            <b class="icon-count" id="count-leaf">0</b>
-                        </div>
-                        <div class="icon-row" id="row-water" data-id="water">
-                            <div class="icon-badge badge-water">💧</div>
-                            <span class="icon-name">Giọt nước</span>
-                            <b class="icon-count" id="count-water">0</b>
-                        </div>
-                        <div class="icon-row" id="row-strawberry" data-id="strawberry">
-                            <div class="icon-badge badge-strawberry">🍓</div>
-                            <span class="icon-name">Dâu tây</span>
-                            <b class="icon-count" id="count-strawberry">0</b>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- panel nv của lv1 -->
-                <div class="panel-section mission-section hidden" id="mission-section">
-                    <div class="panel-header">
-                        <span class="title" id="mission-title">NHIỆM VỤ MÀN 1</span>
-                    </div>
-                    <!-- lv2 cảnh báo đảo nút di chuyển -->
-                    <div class="alert-inverted-box hidden" id="alert-inverted-box">
-                        <div class="alert-inverted-head">
-                            <i class="bi bi-exclamation-triangle-fill"></i> THỬ THÁCH ĐẢO NGƯỢC
-                        </div>
-                        <div class="alert-inverted-desc">
-                            Nhấn <strong>TRÁI (←)</strong> khối đi sang <strong>PHẢI</strong><br>Nhấn <strong>PHẢI (→)</strong> khối đi sang <strong>TRÁI</strong>
-                        </div>
-                    </div>
-
-                    <!-- lv3 cánhr báochướng ngại -->
-                    <div class="alert-obstacle-box hidden" id="alert-obstacle-box">
-                        <div class="alert-obstacle-head">
-                            <i class="bi bi-bricks"></i> THỬ THÁCH CHƯỚNG NGẠI VẬT
-                        </div>
-                        <div class="alert-obstacle-desc">
-                            <strong>🧱 Gạch</strong>: Phá <strong>1 lần</strong> độ bền như gạch rơi<br>
-                            <strong>💣 Bom</strong>: Gom từ <strong>3 quả Bom 💣 kề nhau</strong> sẽ kích hoạt <strong>Siêu Nổ 4x4</strong> quét sạch gạch<br>
-                         <strong>⬇️Dựa vào trọng lục </strong> : khối gạch không có liên kết sẽ tự động rơi nêu có sự liên kết rồi sẽ dừng lại
-                        </div>
-                    </div>
-
-                    <!-- lv5:cảnh báo sinh tônf 2p -->
-                    <div class="alert-survival-box hidden" id="alert-survival-box">
-                        <div class="alert-survival-head">
-                            <i class="bi bi-stopwatch-fill"></i> THỬ THÁCH SINH TỒN
-                        </div>
-                        <div class="alert-survival-desc">
-                            Tốc độ rơi siêu nhanh (140ms)!<br>Sống sót liên tục trong <strong>2:00 phút</strong> để chiến thắng!
-                        </div>
-                    </div>
-
-                    <!-- lv6: khả năng ghi nhớ -->
-                    <div class="alert-blind-box hidden" id="alert-blind-box">
-                        <div class="alert-blind-head">
-                            <i class="bi bi-eye-slash-fill"></i> THỬ THÁCH GHI NHỚ
-                        </div>
-                        <div class="alert-blind-desc">
-                            Gạch đã xếp bên dưới sẽ bị ẩn đi.<br>Nhấn <strong>Space / Shift</strong> (Thả rơi liền) để hiện toàn bộ gạch trong <strong>0.75 giây</strong>!
-                        </div>
-                    </div>
-
-                    <div class="mission-body">
-                        <p class="mission-desc" id="mission-desc">
-                            Đạt 1000 điểm để mở khóa Màn 2.
-                        </p>
-                        <div class="mission-progress-box">
-                            <div class="mission-label">
-                                <span id="mission-goal-label">Điểm mục tiêu</span>
-                                <strong id="mission-goal-val">0 / 1000</strong>
-                            </div>
-                            <div class="progress-bar-bg">
-                                <div class="progress-bar-fill" id="left-progress-fill"></div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!--Lv7: Thử thách siêu boss -->
-                <div class="panel-section boss-battle-section hidden" id="boss-battle-section">
-                    <div class="boss-panel-header">
-                        <span class="boss-header-title"><i class="bi bi-shield-shaded"></i> MÀN 7: BOSS</span>
-                        <span class="boss-phase-tag phase-1" id="boss-phase-tag">GĐ 1: THĂM DÒ</span>
-                    </div>
-
-                    <!-- Avatar boss -->
-                    <div class="boss-avatar-box" id="boss-avatar-box">
-                        <div class="boss-cube-avatar" id="boss-cube-avatar">
-                            <div class="boss-cube-glow"></div>
-                            <span class="boss-eyes-icon" id="boss-eyes-icon">😈</span>
-                        </div>
-                        <div class="boss-name-label"></div>
-                    </div>
-
-                    <!-- Thanh Máu Boss -->
-                    <div class="boss-hp-container">
-                        <div class="boss-hp-header">
-                            <span class="boss-hp-title"><i class="bi bi-heart-pulse-fill"></i> HP BOSS</span>
-                            <strong class="boss-hp-numbers" id="boss-hp-numbers">100 / 100</strong>
-                        </div>
-                        <div class="boss-hp-track">
-                            <div class="boss-hp-damage-bar" id="boss-hp-damage-bar" style="width: 100%;"></div>
-                            <div class="boss-hp-fill" id="boss-hp-fill" style="width: 100%;"></div>
-                        </div>
-                    </div>
-
-                    <!-- đéme ngược thời gian boss phản công -->
-                    <div class="boss-counter-box">
-                        <div class="boss-counter-header">
-                            <span class="boss-counter-label"><i class="bi bi-hourglass-split"></i> Phản công sau:</span>
-                            <strong class="boss-counter-timer" id="boss-counter-timer">20s</strong>
-                        </div>
-                        <div class="boss-counter-track">
-                            <div class="boss-counter-fill" id="boss-counter-fill" style="width: 100%;"></div>
-                        </div>
-                    </div>
-
-                    <!-- trạng thái boss dùng kỷ năng -->
-                    <div class="boss-status-badges" id="boss-status-badges">
-                        <div class="boss-badge badge-shield hidden" id="badge-boss-shield">
-                            <i class="bi bi-shield-fill"></i> KHIÊN -50% DMG (<span id="shield-timer">6s</span>)
-                        </div>
-                        <div class="boss-badge badge-speed hidden" id="badge-boss-speed">
-                            <i class="bi bi-lightning-fill"></i> TĂNG TỐC ĐỘ!
-                        </div>
-                    </div>
-
-                    <!-- Bảng sát thương -->
-                    <div class="boss-dmg-guide">
-                        <div class="dmg-guide-title">QUY TẮC SÁT THƯƠNG:</div>
-                        <div class="dmg-guide-row"><span>Phá 1 hàng</span><strong>-5 HP</strong></div>
-                        <div class="dmg-guide-row"><span>Phá 2 hàng</span><strong>-12 HP</strong></div>
-                        <div class="dmg-guide-row"><span>Phá 3 hàng</span><strong>-20 HP</strong></div>
-                        <div class="dmg-guide-row crit"><span>Phá 4 hàng (Tetris)</span><strong>⚡ -30 HP</strong></div>
-                    </div>
-
-                    <!-- timing out -->
-                    <div class="boss-limit-timer">
-                        <span><i class="bi bi-stopwatch"></i> Thời gian:</span>
-                        <strong id="boss-time-remaining">03:00</strong>
-                    </div>
-                </div>
-
-            </div>
-
-            <!-- CỘT GIỮA -->
-            <div class="board-column">
-                <div class="board-wrapper">
-                    <canvas id="board" width="300" height="600"></canvas>
-                    <!-- Thông báo tạm dừng -->
-                    <div id="board-message" class="board-message">
-                        <h3>TẠM DỪNG</h3>
-                        <p>Nhấn 'P' hoặc 'Tiếp tục' để chơi lại</p>
-                    </div>
-                </div>
-            </div>
-
-            <!-- CỘT PHẢI -->
-            <div class="right-panel">
-                <!-- Khối tiếp theo -->
-                <div class="side-box next-box">
-                    <div class="box-title">KHỐI TIẾP THEO</div>
-                    <canvas id="next" width="110" height="110"></canvas>
-                    <div class="next-desc" id="next-desc">Khối chữ T</div>
-                </div>
-
-                <!-- Điểm số nổi bật -->
-                <div class="side-box score-box">
-                    <div class="score-label">ĐIỂM SỐ</div>
-                    <div class="score-val" id="score">0</div>
-                </div>
-
-                <!-- Thống kê nhỏ -->
-                <div class="mini-stats">
-                    <div class="stat-item">
-                        <span>Thời gian</span>
-                        <strong id="game-time">00:00</strong>
-                    </div>
-                    <div class="stat-item">
-                        <span>Hàng đã xóa</span>
-                        <strong id="lines">0</strong>
-                    </div>
-                    <div class="stat-item">
-                        <span>Màn chơi</span>
-                        <strong id="level">1</strong>
-                    </div>
-                </div>
-
-                <!-- Nút điều khiển -->
-                <div class="controls-row">
-                    <button id="start">▶ Bắt đầu</button>
-                </div>
-
-                <!-- Hướng dẫn phím -->
-                <div class="help" id="help-text">
-                    <div class="help-item"><span>← →</span> : Sang trái / phải</div>
-                    <div class="help-item"><span>↑</span> : Xoay khối gạch</div>
-                    <div class="help-item"><span>↓</span> : Rơi nhanh (Soft drop)</div>
-                    <div class="help-item"><span>Shift / Space</span> : Thả rơi liền</div>
-                    <div class="help-item"><span>P</span> : Tạm dừng</div>
-                </div>
-            </div>
-
+        <div class="modal-menu-action">
+            <button id="btn-modal-menu" class="btn-menu-link">
+                <i class="fa-solid fa-house"></i> Menu
+            </button>
         </div>
     </div>
+</div>
 
-    <!-- Modal Chiến Thắng -->
-    <div id="victory-modal" class="modal-overlay hidden">
-        <div class="modal-box">
-            <h2 id="modal-title">Chiến thắng!</h2>
-            <p class="modal-desc" id="modal-desc">
-                Bạn đã hoàn thành mục tiêu của màn chơi.
-            </p>
+<!-- Modal Thua -->
+<div id="gameover-modal" class="modal-overlay hidden">
+    <div class="modal-box">
+        <h2 id="go-title" style="color: #dc3545;">Game Over</h2>
+        <p class="modal-desc" id="go-desc">Khối gạch đã chạm đỉnh bảng.</p>
 
-            <div class="modal-stats">
-                <div class="modal-stat-item">
-                    <span>Điểm số</span>
-                    <strong id="modal-score">0</strong>
-                </div>
-                <div class="modal-stat-item">
-                    <span>Số hàng đã xóa</span>
-                    <strong id="modal-lines">0</strong>
-                </div>
+        <div class="modal-stats">
+            <div class="modal-stat-item">
+                <span>Điểm đạt được</span>
+                <strong id="go-score">0</strong>
             </div>
-
-            <div class="modal-actions modal-actions-stacked">
-                <button id="btn-continue" class="btn-secondary">
-                    <i class="bi bi-play-fill"></i> Chơi tiếp
-                </button>
-                <button id="btn-next-level" class="btn-primary">
-                    <i class="bi bi-arrow-right-circle"></i> Lv tiếp theo
-                </button>
-                <button id="btn-replay-level" class="btn-secondary">
-                    <i class="bi bi-arrow-clockwise"></i> Chơi lại từ đầu
-                </button>
-            </div>
-            <div class="modal-menu-action">
-                <button id="btn-modal-menu" class="btn-menu-link">
-                    <i class="bi bi-house"></i> Menu
-                </button>
+            <div class="modal-stat-item">
+                <span>Số hàng xóa</span>
+                <strong id="go-lines">0</strong>
             </div>
         </div>
-    </div>
 
-    <!-- Modal Thua -->
-    <div id="gameover-modal" class="modal-overlay hidden">
-        <div class="modal-box">
-            <h2 id="go-title" style="color: #dc3545;">Game Over</h2>
-            <p class="modal-desc" id="go-desc">Khối gạch đã chạm đỉnh bảng.</p>
-
-            <div class="modal-stats">
-                <div class="modal-stat-item">
-                    <span>Điểm đạt được</span>
-                    <strong id="go-score">0</strong>
-                </div>
-                <div class="modal-stat-item">
-                    <span>Số hàng xóa</span>
-                    <strong id="go-lines">0</strong>
-                </div>
-            </div>
-
-            <div class="modal-actions modal-actions-stacked" id="go-actions">
-                <button id="btn-restart" class="btn-primary">
-                    <i class="bi bi-arrow-clockwise"></i> Chơi lại
-                </button>
-            </div>
-            <div class="modal-menu-action">
-                <button id="btn-gameover-menu" class="btn-menu-link">
-                    <i class="bi bi-house"></i> Menu
-                </button>
-            </div>
+        <div class="modal-actions modal-actions-stacked" id="go-actions">
+            <button id="btn-restart" class="btn-primary">
+                <i class="fa-solid fa-arrow-rotate-right"></i> Chơi lại
+            </button>
+        </div>
+        <div class="modal-menu-action">
+            <button id="btn-gameover-menu" class="btn-menu-link">
+                <i class="fa-solid fa-house"></i> Menu
+            </button>
         </div>
     </div>
+</div>
 
-    <script src="style.js"></script>
+<script src="style.js"></script>
 </body>
 
 </html>
